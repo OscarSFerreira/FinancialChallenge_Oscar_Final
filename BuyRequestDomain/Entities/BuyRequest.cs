@@ -1,15 +1,15 @@
 ﻿using BuyRequest.Domain.Entities.Enum;
+using FinancialChallenge_Oscar.Infrastructure.BaseClass;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace BuyRequest.Domain.Entities
 {
-    public class BuyRequest
+    public class BuyRequest : EntityBase
     {
 
-        //private decimal _totalValue;
-        public Guid Id { get; set; }
         public long Code { get; set; }
         public DateTimeOffset Date { get; set; }
         public DateTimeOffset DeliveryDate { get; set; }
@@ -29,8 +29,15 @@ namespace BuyRequest.Domain.Entities
         public decimal CostPrice { get; set; }
         public decimal TotalPricing { get; set; }
 
-        [JsonIgnore]
-        public virtual ICollection<ProductRequest> ProductRequests { get; set; }
+        private List<ProductRequest> _products = new List<ProductRequest>();
+
+        public List<ProductRequest> Products
+        {
+            get { return _products; }
+            set { _products = value ?? new List<ProductRequest>(); }
+        }
+
+        //public virtual ICollection<ProductRequest> Products { get; set; }
 
     }
 }

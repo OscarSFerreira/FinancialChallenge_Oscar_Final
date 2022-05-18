@@ -95,13 +95,13 @@ namespace BuyRequestAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] BuyRequestDTO buyinput)
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] BuyRequestDTO buyinput)
         {
 
             try
             {
-                var bank = await _buyRequestService.UpdateAsync(id, buyinput);
+                var bank = await _buyRequestService.UpdateAsync(buyinput);
 
                 //if (request.Status == Status.Finalized)
                 //{

@@ -1,12 +1,13 @@
 ﻿using BuyRequest.Domain.Entities.Enum;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BuyRequest.Application.DTO
 {
     public class BuyRequestDTO
     {
-
+        public Guid Id { get; set; } = Guid.NewGuid();
         public long Code { get; set; }
         public DateTime Date { get; set; }
         public DateTime DeliveryDate { get; set; }
@@ -24,6 +25,11 @@ namespace BuyRequest.Application.DTO
         public string State { get; set; }
         public decimal Discount { get; set; }
         public decimal CostPrice { get; set; }
+        public decimal TotalPricing
+        => Products.Any() ? Products.Sum(x => x.ProductPrice * x.ProductQuantity) - Discount : 0;
+
+        public decimal ProductPrices
+            => Products.Any() ? Products.Sum(x => x.ProductPrice * x.ProductQuantity) : 0;
 
     }
 }

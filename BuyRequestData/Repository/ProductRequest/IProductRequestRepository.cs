@@ -9,8 +9,8 @@ namespace BuyRequest.Data.Repository.ProductRequest
     public interface IProductRequestRepository : IGenericRepository<Domain.Entities.ProductRequest>
     {
 
-        Task<Domain.Entities.ProductRequest> GetByIdAsync(Guid id);
-        IQueryable<Domain.Entities.ProductRequest> GetAllByRequestId(Guid requestId);
+        //Task<Domain.Entities.ProductRequest> GetByIdAsync(Guid id);
+        //IQueryable<Domain.Entities.ProductRequest> GetAllByRequestId(Guid requestId);
 
     }
 }

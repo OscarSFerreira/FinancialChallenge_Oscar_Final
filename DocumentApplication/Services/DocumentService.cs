@@ -88,12 +88,12 @@ namespace Document.Application.Services
             return mapperDoc;
         }
 
-        public async Task<List<Domain.Entities.Document>> GetAll(PageParameter parameters)
+        public async Task<IEnumerable<Domain.Entities.Document>> GetAll(PageParameter parameters)
         {
 
-            var document = _documentRepository.GetAllWithPaging(parameters).OrderBy(doc => doc.Id).ToList();
+            var document = await _documentRepository.GetAllWithPaging(parameters);
 
-            if (document.Count == 0)
+            if (document.Count() == 0)
             {
                 var error = _documentRepository.NotFoundMessage(doc);
                 var listError = ErrorList(error);

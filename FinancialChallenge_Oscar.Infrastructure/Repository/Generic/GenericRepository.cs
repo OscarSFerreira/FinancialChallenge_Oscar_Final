@@ -1,23 +1,35 @@
-﻿using FinancialChallenge_Oscar.Infrastructure.Context;
+﻿using FinancialChallenge_Oscar.Infrastructure.BaseClass;
+using FinancialChallenge_Oscar.Infrastructure.Context;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
 {
 
-    public class GenericRepository<T> : IGenericRepository<T> where T : class/*, IEntity*/
+    public class GenericRepository<T> : IGenericRepository<T> where T : EntityBase
     {
         private readonly DataContext _context;
         public List<string> errorList = new List<string>();
+        protected readonly DbSet<T> _dbSet;
+        protected Func<IQueryable<T>, IIncludableQueryable<T, object>> _include;
 
         public GenericRepository(DataContext context)
         {
             _context = context;
+            _dbSet = _context.Set<T>();
+        }
+
+        public virtual void SetInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> include)
+        {
+            _include = include;
         }
 
         public async Task AddAsync(T entity)
@@ -51,12 +63,42 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
         //{
         //    return await _context.Set<T>().AnyAsync(x => x.Id == id);
         //}
-        public IEnumerable<T> GetAllWithPaging(PageParameter page)        //testar no geral
+        public async Task<IEnumerable<T>> GetAllWithPaging(PageParameter page)        //testar no geral
         {
-            return _context.Set<T>()
+            var query = _dbSet
                 .Skip((page.PageNumber - 1) * page.PageSize)
                 .Take(page.PageSize)
                 .AsNoTracking();
+
+            if (_include != null)
+            {
+                query = _include(query);
+            }
+            return await query.ToListAsync();
+        }
+
+        public async Task<T> GetByIdAsync(Guid id)
+        {
+            var query = _dbSet
+                .Where(e => e.Id == id);
+
+            if (_include != null)
+            {
+                query = _include(query);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        {
+            var query = _dbSet
+                .Where(predicate);
+
+            if (_include != null)
+            {
+                query = _include(query);
+            }
+            return await query.FirstOrDefaultAsync();
         }
 
         public ErrorMessage<T> BadRequestMessage(T entity, string msg)

@@ -21,4 +21,8 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FinancialChallenge_Oscar.Infrastructure\FinancialChallenge_Oscar.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

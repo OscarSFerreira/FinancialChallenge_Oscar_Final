@@ -11,7 +11,7 @@ namespace BankRequest.Application.Interfaces
     {
 
         Task PostBankRecord(BankRequestDTO input);
-        Task<BankRequestViewModel> GetAll(PageParameter parameters);
+        Task<IEnumerable<BankRequestViewModel>> GetAll(PageParameter parameters);
         Task<Domain.Entities.BankRequest> GetById(Guid id);
         Task<Domain.Entities.BankRequest> GetByOriginId(Guid OriginId);
         Task<Domain.Entities.BankRequest> ChangeBankRequest(Guid id, BankRequestDTO bankRecord);

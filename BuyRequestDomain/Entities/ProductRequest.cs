@@ -1,18 +1,14 @@
 ﻿using BuyRequest.Domain.Entities.Enum;
+using FinancialChallenge_Oscar.Infrastructure.BaseClass;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace BuyRequest.Domain.Entities
 {
-    public class ProductRequest
+    public class ProductRequest : EntityBase
     {
-
         private decimal _total;
-
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [ForeignKey("Fk_BuyRequests")]
-        public Guid RequestId { get; set; }
+        public Guid BuyRequestId { get; set; } 
+        public virtual BuyRequest BuyRequest { get; set; }
         public Guid ProductId { get; set; } = Guid.NewGuid();
         public string ProductDescription { get; set; }
         public ProductCategory ProductCategory { get; set; } //enum
@@ -22,17 +18,14 @@ namespace BuyRequest.Domain.Entities
         {
             get
             {
-                return _total = Convert.ToDecimal((ProductQuantity * ProductPrice).ToString("N2"));
+                return _total;
             }
             set
             {
-                _total = value;
+                _total = Convert.ToDecimal((ProductQuantity * ProductPrice).ToString("N2"));
             }
 
         }
-
-        [JsonIgnore]
-        public virtual BuyRequest BuyRequests { get; set; }
 
     }
 }

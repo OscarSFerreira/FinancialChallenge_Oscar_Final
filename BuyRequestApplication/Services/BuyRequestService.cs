@@ -20,7 +20,6 @@ namespace BuyRequest.Application.Services
         private readonly IMapper _mapper;
         private readonly IProductRequestService _productRequestService;
         public Domain.Entities.BuyRequest buyReq = new();
-        public Domain.Entities.ProductRequest prodReq = new();
 
         public BuyRequestService(IBuyRequestRepository buyRequestRepository, IProductRequestService productRequestService, IMapper mapper)
         {
@@ -42,7 +41,7 @@ namespace BuyRequest.Application.Services
 
         public async Task<Domain.Entities.BuyRequest> Post(BuyRequestDTO buyinput)
         {
-            var mapperBuy = _mapper.Map(buyinput, buyReq);
+            var mapperBuy = _mapper.Map<Domain.Entities.BuyRequest>(buyinput);
 
             var buyValidator = new BuyRequestValidator();
             var buyValid = buyValidator.Validate(mapperBuy);
@@ -51,14 +50,14 @@ namespace BuyRequest.Application.Services
             {
                 await _buyRequestRepository.AddAsync(mapperBuy);
 
-                decimal totalprice = await _productRequestService.PostProduct(buyinput.Products, mapperBuy.Id);
+                //decimal totalprice = await _productRequestService.PostProduct(buyinput.Products, mapperBuy.Id);
 
-                buyReq.ProductPrices = totalprice;
+                //buyReq.ProductPrices = totalprice;
 
-                mapperBuy.Status = Status.Received;
-                mapperBuy.TotalPricing = buyReq.ProductPrices - (buyReq.ProductPrices * (buyReq.Discount / 100));
+                //mapperBuy.Status = Status.Received;
+                //mapperBuy.TotalPricing = buyReq.ProductPrices - (buyReq.ProductPrices * (buyReq.Discount / 100));
 
-                await _buyRequestRepository.UpdateAsync(mapperBuy);
+                //await _buyRequestRepository.UpdateAsync(mapperBuy);
 
             }
             else
@@ -74,12 +73,12 @@ namespace BuyRequest.Application.Services
 
         }
 
-        public async Task<List<Domain.Entities.BuyRequest>> GetAll(PageParameter parameters)
+        public async Task<IEnumerable<Domain.Entities.BuyRequest>> GetAll(PageParameter parameters)
         {
 
-            var buyRequest = _buyRequestRepository.GetAllWithPaging(parameters).OrderBy(buy => buy.Id).ToList();
+            var buyRequest = await _buyRequestRepository.GetAllWithPaging(parameters);
 
-            if (buyRequest.Count == 0)
+            if (buyRequest.Count() == 0)
             {
                 var error = _buyRequestRepository.NotFoundMessage(buyReq);
                 var listError = ErrorList(error);
@@ -110,7 +109,7 @@ namespace BuyRequest.Application.Services
         public async Task<Domain.Entities.BuyRequest> GetByClientIdAsync(Guid clientId)
         {
 
-            var record = await _buyRequestRepository.GetByClientIdAsync(clientId);
+            var record = await _buyRequestRepository.GetAsync(x => x.ClientId == clientId);
 
             if (record == null)
             {
@@ -124,10 +123,10 @@ namespace BuyRequest.Application.Services
             }
         }
 
-        public async Task<Domain.Entities.BuyRequest> UpdateAsync(Guid id, BuyRequestDTO buyinput)
+        public async Task<Domain.Entities.BuyRequest> UpdateAsync(BuyRequestDTO buyinput)
         {
 
-            var request = await _buyRequestRepository.GetByIdAsync(id);
+            var request = await _buyRequestRepository.GetByIdAsync(buyinput.Id);
 
             if (request == null /*|| products == null*/)
             {
@@ -143,13 +142,10 @@ namespace BuyRequest.Application.Services
                 throw new Exception(listError);
             }
 
-            var oldStatus = request.Status;
-            var totalValueOld = request.TotalPricing;
+            //var Products = await _productRequestService.UpdateByProdIdAsync(buyinput);
+            //request.ProductPrices = Products;
 
-            var Products = await _productRequestService.UpdateByProdIdAsync(id, buyinput);
-            request.ProductPrices = Products;
-
-            request.TotalPricing = request.ProductPrices - (request.ProductPrices * (request.Discount / 100));
+            //request.TotalPricing = request.ProductPrices - (request.ProductPrices * (request.Discount / 100));
 
             var mapperBuy = _mapper.Map(buyinput, request);
 
@@ -216,7 +212,7 @@ namespace BuyRequest.Application.Services
                 throw new Exception(listError);
             }
 
-            await _productRequestService.ChangeStateProd(id, state);
+            //await _productRequestService.ChangeStateProd(id, state);
 
             request.Status = state;
 
@@ -267,9 +263,7 @@ namespace BuyRequest.Application.Services
             //    }
 
             //}
-
             return buyRequest;
-
         }
     }
 }

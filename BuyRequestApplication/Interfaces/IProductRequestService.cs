@@ -9,9 +9,9 @@ namespace BuyRequest.Application.Interfaces
     public interface IProductRequestService
     {
 
-        Task<decimal> PostProduct(List<ProductRequestDTO> prodInput, Guid RequestId);
-        Task<decimal> UpdateByProdIdAsync(Guid id, BuyRequestDTO buyRequest);
-        Task ChangeStateProd(Guid id, Status state);
+        //Task<decimal> PostProduct(List<ProductRequestDTO> prodInput, Guid RequestId);
+        ////Task<decimal> UpdateByProdIdAsync(Guid id, BuyRequestDTO buyRequest);
+        //Task ChangeStateProd(Guid id, Status state);
 
 
     }

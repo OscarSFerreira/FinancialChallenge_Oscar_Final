@@ -17,19 +17,19 @@ namespace BuyRequest.Data.Repository.ProductRequest
             _context = context;
         }
 
-        public async Task<Domain.Entities.ProductRequest> GetByIdAsync(Guid id)
-        {
-            return await _context.Set<Domain.Entities.ProductRequest>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == id);
-        }
+        //public async Task<Domain.Entities.ProductRequest> GetByIdAsync(Guid id)
+        //{
+        //    return await _context.Set<Domain.Entities.ProductRequest>()
+        //        .AsNoTracking()
+        //        .FirstOrDefaultAsync(e => e.Id == id);
+        //}
 
-        public IQueryable<Domain.Entities.ProductRequest> GetAllByRequestId(Guid requestId)
-        {
-            return _context.Set<Domain.Entities.ProductRequest>()
-                .AsNoTracking()
-                .Where(e => e.RequestId == requestId);
-        }
+        //public IQueryable<Domain.Entities.ProductRequest> GetAllByRequestId(Guid requestId)
+        //{
+        //    return _context.Set<Domain.Entities.ProductRequest>()
+        //        .AsNoTracking()
+        //        .Where(e => e.BuyRequestId == requestId);
+        //}
 
     }
 

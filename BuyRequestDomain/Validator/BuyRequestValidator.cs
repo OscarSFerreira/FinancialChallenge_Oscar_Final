@@ -1,5 +1,11 @@
-﻿using FluentValidation;
+﻿using BuyRequest.Domain.Entities;
+using FluentValidation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BuyRequest.Domain.Validator
 {
@@ -44,7 +50,13 @@ namespace BuyRequest.Domain.Validator
 
             RuleFor(x => x.TotalPricing)
                .NotNull().WithMessage("Total Value field is required");
-        }
 
+            RuleForEach(x => x.Products).SetValidator(new ProductRequestValidator());
+
+            RuleFor(x => x.Products).Must(x => x.GroupBy(p => p.ProductCategory).Count() == 1)
+                .WithMessage("There can only be one category of Products!");
+
+            //RuleFor(x => x.Status).Must(x => )
+        }
     }
 }

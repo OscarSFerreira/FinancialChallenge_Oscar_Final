@@ -8,6 +8,7 @@ using BankRequest.Domain.Validator;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -69,14 +70,14 @@ namespace BankRequest.Application.Services
             return errorList;
         }
 
-        public async Task<BankRequestViewModel> GetAll(PageParameter parameters)
+        public async Task<IEnumerable<BankRequestViewModel>> GetAll(PageParameter parameters)
         {
 
             BankRequestViewModel bankRecord = new BankRequestViewModel();
 
-            bankRecord.BankRecords = _bankRequestRepository.GetAllWithPaging(parameters).OrderBy(rec => rec.Id).ToList();
+            bankRecord.BankRecords = await _bankRequestRepository.GetAllWithPaging(parameters);
 
-            if (bankRecord.BankRecords.Count == 0)
+            if (bankRecord.BankRecords.Count() == 0)
             {
                 var error = _bankRequestRepository.NotFoundMessage(bank);
 
@@ -88,7 +89,7 @@ namespace BankRequest.Application.Services
                 bankRecord.Total = bankRecord.BankRecords.Sum(rec => rec.Amount);
             }
 
-            return bankRecord;
+            return (IEnumerable<BankRequestViewModel>)bankRecord;
         }
 
         public async Task<Domain.Entities.BankRequest> GetById(Guid id)
@@ -105,10 +106,10 @@ namespace BankRequest.Application.Services
             return bankrec;
         }
 
-        public async Task<Domain.Entities.BankRequest> GetByOriginId(Guid OriginId)
+        public async Task<Domain.Entities.BankRequest> GetByOriginId(Guid originId)
         {
 
-            var bankrec = await _bankRequestRepository.GetByOriginIdAsync(OriginId);
+            var bankrec = await _bankRequestRepository.GetAsync(x=>x.OriginId == originId);
 
             if (bankrec == null)
             {

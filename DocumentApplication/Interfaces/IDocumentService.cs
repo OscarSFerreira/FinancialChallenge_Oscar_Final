@@ -10,7 +10,7 @@ namespace Document.Application.Interfaces
     {
 
         Task<Domain.Entities.Document> Post(DocumentDTO input);
-        Task<List<Domain.Entities.Document>> GetAll(PageParameter parameters);
+        Task<IEnumerable<Domain.Entities.Document>> GetAll(PageParameter parameters);
         Task<Domain.Entities.Document> GetById(Guid id);
         Task<Domain.Entities.Document> ChangeDocument(Guid id, DocumentDTO input);
         Task<Domain.Entities.Document> ChangeState(Guid id, bool Status);

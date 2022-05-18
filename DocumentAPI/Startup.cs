@@ -1,3 +1,6 @@
+using BankRequest.ClientApi;
+using BankRequest.ClientApi.Configuration;
+using BankRequest.ClientApi.Interfaces;
 using Document.Application.Interfaces;
 using Document.Application.Services;
 using Document.Data.Context;
@@ -36,8 +39,10 @@ namespace DocumentAPI
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddBankRequestConfiguration(Configuration);
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IDocumentService, DocumentService>();
+            //services.AddScoped<IBankRequestClient, BankRequestClient>();
             //services.AddScoped<IBankRequestRepository, BankRequestRepository>();
 
         }

@@ -1,13 +1,13 @@
 ﻿using Document.Domain.Entities.Enum;
+using FinancialChallenge_Oscar.Infrastructure.BaseClass;
 using System;
 
 namespace Document.Domain.Entities
 {
-    public class Document
+    public class Document : EntityBase
     {
 
         private DateTimeOffset? _date;
-        public Guid Id { get; set; } = Guid.NewGuid();
         public string Number { get; set; }
         public DateTimeOffset Date { get; set; }
         public DocType DocType { get; set; }

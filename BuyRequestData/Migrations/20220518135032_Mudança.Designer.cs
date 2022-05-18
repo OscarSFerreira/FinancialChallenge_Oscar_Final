@@ -4,14 +4,16 @@ using BuyRequest.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BuyRequest.Data.Migrations
 {
     [DbContext(typeof(BuyRequestContext))]
-    partial class BuyRequestContextModelSnapshot : ModelSnapshot
+    [Migration("20220518135032_Mudança")]
+    partial class Mudança
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
