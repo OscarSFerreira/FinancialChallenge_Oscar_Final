@@ -178,11 +178,23 @@ namespace BuyRequest.Application.Services
                 var recentValue = mapperBuy.TotalPricing; //valor recente (total)
                 string description = $"Financial transaction order id: {request.Id}";
 
-                if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && request.TotalPricing > recentValue /*&& totalValueOld > mapperBuy.TotalPricing*/)
+                if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && recentValue > request.TotalPricing /*&& totalValueOld > mapperBuy.TotalPricing*/)
+                {
+                    description = $"Diference purchase order id: {request.Id}";
+                    recentValue = mapperBuy.TotalPricing - request.TotalPricing /*- totalValueOld*/;
+                    type = BankRequest.Domain.Entities.Enum.Type.Receive;
+                }
+                else if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && request.TotalPricing  > recentValue)
                 {
                     description = $"Diference purchase order id: {request.Id}";
                     recentValue = mapperBuy.TotalPricing - request.TotalPricing /*- totalValueOld*/;
                     type = BankRequest.Domain.Entities.Enum.Type.Payment;
+                }
+                else
+                {
+                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was no change on the Total amount!");
+                    var listError = ErrorList(result);
+                    throw new Exception(listError);
                 }
 
                 var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, mapperBuy.Id, description,
