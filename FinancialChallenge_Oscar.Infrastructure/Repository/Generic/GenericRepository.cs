@@ -63,7 +63,7 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
         //{
         //    return await _context.Set<T>().AnyAsync(x => x.Id == id);
         //}
-        public async Task<IEnumerable<T>> GetAllWithPaging(PageParameter page)        //testar no geral
+        public async Task<List<T>> GetAllWithPaging(PageParameter page)        //testar no geral
         {
             var query = _dbSet
                 .Skip((page.PageNumber - 1) * page.PageSize)
@@ -80,7 +80,8 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
         public async Task<T> GetByIdAsync(Guid id)
         {
             var query = _dbSet
-                .Where(e => e.Id == id);
+                .Where(e => e.Id == id)
+                .AsNoTracking();
 
             if (_include != null)
             {

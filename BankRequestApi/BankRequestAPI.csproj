@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankRequest.ClientApi\BankRequest.ClientApi.csproj" />
     <ProjectReference Include="..\BankRequestApplication\BankRequest.Application.csproj" />
     <ProjectReference Include="..\BuyRequestData\BuyRequest.Data.csproj" />
     <ProjectReference Include="..\DocumentData\Document.Data.csproj" />

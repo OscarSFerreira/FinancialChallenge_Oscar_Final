@@ -19,17 +19,13 @@ namespace BankRequest.Application.Services
     {
 
         private readonly IBankRequestRepository _bankRequestRepository;
-        //private readonly IDocumentRepository _documentRepository;
-        //private readonly IBuyRequestRepository _buyRequestRepository;
         private readonly IMapper _mapper;
         Domain.Entities.BankRequest bank = new Domain.Entities.BankRequest();
 
-        public BankRequestService(IBankRequestRepository bankRequestRepository/*, IDocumentRepository documentRepository*/, IMapper mapper/*, IBuyRequestRepository buyRequestRepository*/)
+        public BankRequestService(IBankRequestRepository bankRequestRepository, IMapper mapper)
         {
             _mapper = mapper;
             _bankRequestRepository = bankRequestRepository;
-            //_documentRepository = documentRepository;
-            //_buyRequestRepository = buyRequestRepository;
         }
 
         public async Task PostBankRecord(BankRequestDTO input)
@@ -70,7 +66,7 @@ namespace BankRequest.Application.Services
             return errorList;
         }
 
-        public async Task<IEnumerable<BankRequestViewModel>> GetAll(PageParameter parameters)
+        public async Task<BankRequestViewModel> GetAll(PageParameter parameters)
         {
 
             BankRequestViewModel bankRecord = new BankRequestViewModel();
@@ -89,7 +85,7 @@ namespace BankRequest.Application.Services
                 bankRecord.Total = bankRecord.BankRecords.Sum(rec => rec.Amount);
             }
 
-            return (IEnumerable<BankRequestViewModel>)bankRecord;
+            return bankRecord;
         }
 
         public async Task<Domain.Entities.BankRequest> GetById(Guid id)
@@ -120,7 +116,7 @@ namespace BankRequest.Application.Services
             return bankrec;
         }
 
-        public async Task<Domain.Entities.BankRequest> ChangeBankRequest(Guid id, BankRequestDTO bankRecord)
+        public async Task<Domain.Entities.BankRequest> ChangeBankRequest(Guid id, BankRequestDTO bankRequest)
         {
             var bankReqUpdate = await _bankRequestRepository.GetByIdAsync(id);
             if (bankReqUpdate == null)
@@ -133,8 +129,9 @@ namespace BankRequest.Application.Services
             if (bankReqUpdate.Origin == Origin.Null)
             {
                 bankReqUpdate.OriginId = null;
-                bankRecord.OriginId = null;
+                bankRequest.OriginId = null;
                 bankReqUpdate.Origin = Origin.Null;
+                bankRequest.Origin = Origin.Null;
             }
             else if (bankReqUpdate.OriginId != null)
             {
@@ -143,7 +140,7 @@ namespace BankRequest.Application.Services
                 throw new Exception(error);
             }
 
-            var mapBankRecord = _mapper.Map(bankRecord, bankReqUpdate);
+            var mapBankRecord = _mapper.Map(bankRequest, bankReqUpdate);
 
             var validator = new BankRequestValidator();
             var valid = validator.Validate(mapBankRecord);

@@ -20,9 +20,10 @@ namespace Document.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IDocumentRepository _documentRepository;
+        public IBankRequestClient _bankRequestClient;
+
         Domain.Entities.Document doc = new Domain.Entities.Document();
 
-        public IBankRequestClient _bankRequestClient;
 
         public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IBankRequestClient bankRequestClient)
         {
@@ -44,7 +45,7 @@ namespace Document.Application.Services
 
         public async Task<Domain.Entities.Document> Post(DocumentDTO input)
         {
-            var mapperDoc = _mapper.Map(input, doc);
+            var mapperDoc = _mapper.Map<Domain.Entities.Document>(input);
 
             var validator = new DocumentValidator();
             var valid = validator.Validate(mapperDoc);
@@ -56,12 +57,14 @@ namespace Document.Application.Services
                     var type = new BankRequest.Domain.Entities.Enum.Type();
                     if (mapperDoc.Operation == Operation.Entry)
                     {
+                        type = BankRequest.Domain.Entities.Enum.Type.Receive; //Trocar os enums de ordem
+                    }
+                    else
+                    {
                         type = BankRequest.Domain.Entities.Enum.Type.Payment;
                     }
-                    else/*(mapperDoc.Operation == Operation.Exit)*/
-                    {
-                        type = BankRequest.Domain.Entities.Enum.Type.Receive;
-                    }
+
+                    await _documentRepository.AddAsync(mapperDoc);
 
                     var response = await _bankRequestClient.PostCashBank(Origin.Document, mapperDoc.Id, $"Financial Transaction id: {mapperDoc.Id}",
                         type, mapperDoc.Total);
@@ -74,8 +77,6 @@ namespace Document.Application.Services
                     }
 
                 }
-
-                await _documentRepository.AddAsync(mapperDoc);
 
             }
             else
@@ -140,12 +141,12 @@ namespace Document.Application.Services
                 throw new Exception(listError);
             }
 
-            var mapperDoc = _mapper.Map(input, document);
+            var mapperDoc = _mapper.Map<Domain.Entities.Document>(input);
 
             var validator = new DocumentValidator();
             var valid = validator.Validate(mapperDoc);
 
-            var TotalUpdated = document.Total - totalValueOld;
+            var TotalUpdated = mapperDoc.Total - totalValueOld; // VERIFICAR ESTA CONTA, QUANDO PASSAMOS DE UMA OPERAÇÃO PARA A OUTRA?
 
             if (valid.IsValid)
             {
@@ -158,7 +159,7 @@ namespace Document.Application.Services
 
                     if (document.Paid == false && input.Paid == true)
                     {
-                        description = $"Financial Transaction id: {document.Id}";
+                        description = $"Financial Transaction in Document id: {document.Id}";
                         type = BankRequest.Domain.Entities.Enum.Type.Receive;
                         total = input.Total;
                     }
@@ -213,7 +214,7 @@ namespace Document.Application.Services
 
             if (document.Paid == true)
             {
-
+                //E SE FOR UMA DESPESA (TYPE.PAYMENT)?
                 var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Financial Transaction id: {document.Id}",
                      BankRequest.Domain.Entities.Enum.Type.Receive, document.Total);
 

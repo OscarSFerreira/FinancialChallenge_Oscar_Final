@@ -18,6 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankRequest.ClientApi\BankRequest.ClientApi.csproj" />
+    <ProjectReference Include="..\BankRequestDomain\BankRequest.Domain.csproj" />
     <ProjectReference Include="..\BuyRequestData\BuyRequest.Data.csproj" />
     <ProjectReference Include="..\BuyRequestDomain\BuyRequest.Domain.csproj" />
   </ItemGroup>

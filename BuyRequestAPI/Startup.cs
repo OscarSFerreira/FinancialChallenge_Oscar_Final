@@ -1,3 +1,4 @@
+using BankRequest.ClientApi.Configuration;
 using BuyRequest.Application.Interfaces;
 using BuyRequest.Application.Services;
 using BuyRequest.Data.Context;
@@ -39,6 +40,7 @@ namespace BuyRequestAPI
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddBankRequestConfiguration(Configuration);
             services.AddScoped<IBuyRequestRepository, BuyRequestRepository>();
             services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
             services.AddScoped<IBuyRequestService, BuyRequestService>();

@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using BankRequest.ClientApi.Interfaces;
+using BankRequest.Domain.Entities;
+using BankRequest.Domain.Entities.Enum;
 using BuyRequest.Application.DTO;
 using BuyRequest.Application.Interfaces;
 using BuyRequest.Data.Repository.BuyRequest;
@@ -19,13 +22,16 @@ namespace BuyRequest.Application.Services
         private readonly IBuyRequestRepository _buyRequestRepository;
         private readonly IMapper _mapper;
         private readonly IProductRequestService _productRequestService;
+        public IBankRequestClient _bankRequestClient;
+
         public Domain.Entities.BuyRequest buyReq = new();
 
-        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IProductRequestService productRequestService, IMapper mapper)
+        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IProductRequestService productRequestService, IMapper mapper, IBankRequestClient bankRequestClient)
         {
             _buyRequestRepository = buyRequestRepository;
             _productRequestService = productRequestService;
             _mapper = mapper;
+            _bankRequestClient = bankRequestClient;
         }
 
         public string ErrorList(ErrorMessage<Domain.Entities.BuyRequest> error)
@@ -58,7 +64,6 @@ namespace BuyRequest.Application.Services
                 //mapperBuy.TotalPricing = buyReq.ProductPrices - (buyReq.ProductPrices * (buyReq.Discount / 100));
 
                 //await _buyRequestRepository.UpdateAsync(mapperBuy);
-
             }
             else
             {
@@ -128,7 +133,9 @@ namespace BuyRequest.Application.Services
 
             var request = await _buyRequestRepository.GetByIdAsync(buyinput.Id);
 
-            if (request == null /*|| products == null*/)
+            var oldStatus = request.Status;
+
+            if (request == null)
             {
                 var error = _buyRequestRepository.NotFoundMessage(buyReq);
                 var listError = ErrorList(error);
@@ -147,7 +154,7 @@ namespace BuyRequest.Application.Services
 
             //request.TotalPricing = request.ProductPrices - (request.ProductPrices * (request.Discount / 100));
 
-            var mapperBuy = _mapper.Map(buyinput, request);
+            var mapperBuy = _mapper.Map<Domain.Entities.BuyRequest>(buyinput);
 
             var buyValidator = new BuyRequestValidator();
             var buyValid = buyValidator.Validate(mapperBuy);
@@ -165,29 +172,29 @@ namespace BuyRequest.Application.Services
                 throw new Exception(error);
             }
 
-            //COMUNICAÇÃO
-            //if (request.Status == Status.Finalized)
-            //{
-            //    var type = Domain.Entities.Type.Receive;
-            //    var recentValue = mapperBuy.TotalPricing; //valor recente (total)
-            //    string description = $"Financial transaction order id: {request.Id}";
+            if (mapperBuy.Status == Status.Finalized)
+            {
+                var type = BankRequest.Domain.Entities.Enum.Type.Receive;
+                var recentValue = mapperBuy.TotalPricing; //valor recente (total)
+                string description = $"Financial transaction order id: {request.Id}";
 
-            //    if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && totalValueOld > mapperBuy.TotalPricing)
-            //    {
-            //        description = $"Diference purchase order id: {request.Id}";
-            //        recentValue = mapperBuy.TotalPricing - totalValueOld;
-            //        type = DesafioFinanceiro_Oscar.Domain.Entities.Type.Payment;
-            //    }
+                if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && request.TotalPricing > recentValue /*&& totalValueOld > mapperBuy.TotalPricing*/)
+                {
+                    description = $"Diference purchase order id: {request.Id}";
+                    recentValue = mapperBuy.TotalPricing - request.TotalPricing /*- totalValueOld*/;
+                    type = BankRequest.Domain.Entities.Enum.Type.Payment;
+                }
 
-            //    var response = await _bankRecordRepository.CreateBankRecord(Origin.PurchaseRequest, mapperBuy.Id, description,
-            //        type, recentValue);
+                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, mapperBuy.Id, description,
+                    type, recentValue);
 
-            //    if (!response.IsSuccessStatusCode)
-            //    {
-            //        var result = _bankRecordRepository.BadRequestMessage(bank, response.Content.ToString());
-            //        return StatusCode((int)HttpStatusCode.BadRequest, result);
-            //    }
-            //}
+                if (response == false)
+                {
+                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var listError = ErrorList(result);
+                    throw new Exception(listError);
+                }
+            }
 
             return mapperBuy;
 
@@ -218,19 +225,20 @@ namespace BuyRequest.Application.Services
 
             await _buyRequestRepository.UpdateAsync(request);
 
-            //if (request.Status == Status.Finalized)
-            //{
+            if (request.Status == Status.Finalized)
+            {
 
-            //    var response = await _bankRecordRepository.CreateBankRecord(Origin.PurchaseRequest, request.Id, $"Purshase order id: {request.Id}",
-            //        DesafioFinanceiro_Oscar.Domain.Entities.Type.Receive, request.TotalPricing);
+                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, request.Id, $"Purshase order id: {request.Id}",
+                    BankRequest.Domain.Entities.Enum.Type.Receive, request.TotalPricing);
 
-            //    if (!response.IsSuccessStatusCode)
-            //    {
-            //        var result = _bankRecordRepository.BadRequestMessage(bank, response.Content.ToString());
-            //        return StatusCode((int)HttpStatusCode.BadRequest, result);
-            //    }
+                if (response == false)
+                {
+                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var listError = ErrorList(result);
+                    throw new Exception(listError);
+                }
 
-            //}
+            }
 
             return request;
 
@@ -250,19 +258,20 @@ namespace BuyRequest.Application.Services
 
             await _buyRequestRepository.DeleteAsync(buyRequest);
 
-            //if (buyRequest.Status == Status.Finalized)
-            //{
+            if (buyRequest.Status == Status.Finalized)
+            {
 
-            //    var response = await _bankRecordRepository.CreateBankRecord(Origin.PurchaseRequest, id, $"Revert Purshase order id: {buyRequest.Id}",
-            //        DesafioFinanceiro_Oscar.Domain.Entities.Type.Revert, -buyRequest.TotalPricing);
+                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, id, $"Revert Purshase order id: {buyRequest.Id}",
+                    BankRequest.Domain.Entities.Enum.Type.Revert, -buyRequest.TotalPricing);
 
-            //    if (!response.IsSuccessStatusCode)
-            //    {
-            //        var result = _bankRecordRepository.BadRequestMessage(bank, response.Content.ToString());
-            //        return StatusCode((int)HttpStatusCode.BadRequest, result);
-            //    }
+                if (response == false)
+                {
+                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var listError = ErrorList(result);
+                    throw new Exception(listError);
+                }
 
-            //}
+            }
             return buyRequest;
         }
     }

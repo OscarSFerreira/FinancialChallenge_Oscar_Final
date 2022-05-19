@@ -1,5 +1,6 @@
 using BankRequest.Application.Interfaces;
 using BankRequest.Application.Services;
+using BankRequest.ClientApi.Configuration;
 using BankRequest.Data.Context;
 using BankRequest.Data.Repository;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +37,7 @@ namespace BankRequestApi
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddBankRequestConfiguration(Configuration);
             services.AddScoped<IBankRequestRepository, BankRequestRepository>();
             services.AddScoped<IBankRequestService, BankRequestService>();
             //services.AddScoped<IDocumentRepository, DocumentRepository>();

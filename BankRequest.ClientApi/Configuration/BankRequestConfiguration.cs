@@ -13,8 +13,8 @@ namespace BankRequest.ClientApi.Configuration
 
             services.Configure<BankRequestOptions>(options =>
             {
-                options.BaseAddress = configuration["BankRequest.ClientAPI:BaseAddress"];
-                options.EndPoint = configuration["BankRequest.ClientAPI:EndPoint"];
+                options.BaseAddress = configuration["BankRequest.ClientApi:BaseAddress"];
+                options.EndPoint = configuration["BankRequest.ClientApi:EndPoint"];
             });
             services.AddHttpClient<IBankRequestClient, BankRequestClient>();
 

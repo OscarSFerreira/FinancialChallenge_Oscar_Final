@@ -31,7 +31,7 @@ namespace BankRequestAPI.Controllers
             _bankRequestService = bankRequestService;
         }
 
-        [HttpPost]
+        [HttpPost("PostBankRequest")]
         public async Task<IActionResult> Post([FromBody] BankRequestDTO input)
         {
             try

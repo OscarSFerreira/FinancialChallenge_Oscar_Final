@@ -14,7 +14,7 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
         IQueryable<T> GetAll();
-        Task<IEnumerable<T>> GetAllWithPaging(PageParameter page);
+        Task<List<T>> GetAllWithPaging(PageParameter page);
         ErrorMessage<T> BadRequestMessage(T entity, string msg);
         ErrorMessage<T> NotFoundMessage(T entity);
         Task<T> GetByIdAsync(Guid id);
