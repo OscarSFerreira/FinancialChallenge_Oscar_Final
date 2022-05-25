@@ -2,7 +2,6 @@
 using BankRequest.Application.ViewModel;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BankRequest.Application.Interfaces

@@ -251,9 +251,7 @@ namespace BuyRequest.Application.Services
                 }
 
             }
-
             return request;
-
         }
 
         public async Task<Domain.Entities.BuyRequest> DeleteById(Guid id)

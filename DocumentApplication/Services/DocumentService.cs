@@ -57,7 +57,7 @@ namespace Document.Application.Services
                     var type = new BankRequest.Domain.Entities.Enum.Type();
                     if (mapperDoc.Operation == Operation.Entry)
                     {
-                        type = BankRequest.Domain.Entities.Enum.Type.Receive; //Trocar os enums de ordem
+                        type = BankRequest.Domain.Entities.Enum.Type.Receive;
                     }
                     else
                     {
@@ -76,6 +76,10 @@ namespace Document.Application.Services
                         throw new Exception(listError);
                     }
 
+                }
+                else
+                {
+                    await _documentRepository.AddAsync(mapperDoc);
                 }
 
             }
@@ -215,8 +219,14 @@ namespace Document.Application.Services
             if (document.Paid == true)
             {
                 //E SE FOR UMA DESPESA (TYPE.PAYMENT)?
+                var operationType = BankRequest.Domain.Entities.Enum.Type.Receive;
+                if (document.Operation == Operation.Exit)
+                {
+                    operationType = BankRequest.Domain.Entities.Enum.Type.Payment;
+                }
+
                 var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Financial Transaction id: {document.Id}",
-                     BankRequest.Domain.Entities.Enum.Type.Receive, document.Total);
+                     operationType, document.Total);
 
                 if (response == false)
                 {
