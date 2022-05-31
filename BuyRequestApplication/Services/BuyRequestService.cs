@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BankRequest.ClientApi.Interfaces;
-using BankRequest.Domain.Entities;
 using BankRequest.Domain.Entities.Enum;
 using BuyRequest.Application.DTO;
 using BuyRequest.Application.Interfaces;
@@ -21,20 +20,16 @@ namespace BuyRequest.Application.Services
     {
         private readonly IBuyRequestRepository _buyRequestRepository;
         private readonly IMapper _mapper;
-        private readonly IProductRequestService _productRequestService;
         public IBankRequestClient _bankRequestClient;
 
-        public Domain.Entities.BuyRequest buyReq = new();
-
-        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IProductRequestService productRequestService, IMapper mapper, IBankRequestClient bankRequestClient)
+        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IMapper mapper, IBankRequestClient bankRequestClient)
         {
             _buyRequestRepository = buyRequestRepository;
-            _productRequestService = productRequestService;
             _mapper = mapper;
             _bankRequestClient = bankRequestClient;
         }
 
-        public string ErrorList(ErrorMessage<Domain.Entities.BuyRequest> error)
+        public string ErrorList(ErrorMessage<BuyRequestDTO> error)
         {
             var errorList = "";
 
@@ -43,6 +38,22 @@ namespace BuyRequest.Application.Services
                 errorList += item.ToString() + " ";
             }
             return errorList;
+        }
+
+        public ErrorMessage<BuyRequestDTO> NotFoundMessage(BuyRequestDTO entity)
+        {
+            var errorList = new List<string>();
+            errorList.Add("This database does not contain the data you requested!");
+            var error = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
+
+        public ErrorMessage<BuyRequestDTO> BadRequestMessage(BuyRequestDTO entity, string msg)
+        {
+            var errorList = new List<string>();
+            errorList.Add(msg);
+            var error = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(), errorList, entity);
+            return error;
         }
 
         public async Task<Domain.Entities.BuyRequest> Post(BuyRequestDTO buyinput)
@@ -55,37 +66,26 @@ namespace BuyRequest.Application.Services
             if (buyValid.IsValid)
             {
                 await _buyRequestRepository.AddAsync(mapperBuy);
-
-                //decimal totalprice = await _productRequestService.PostProduct(buyinput.Products, mapperBuy.Id);
-
-                //buyReq.ProductPrices = totalprice;
-
-                //mapperBuy.Status = Status.Received;
-                //mapperBuy.TotalPricing = buyReq.ProductPrices - (buyReq.ProductPrices * (buyReq.Discount / 100));
-
-                //await _buyRequestRepository.UpdateAsync(mapperBuy);
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                        buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyReq);
+                var errorList = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                        buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyinput);
 
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
-
             return mapperBuy;
-
         }
 
         public async Task<IEnumerable<Domain.Entities.BuyRequest>> GetAll(PageParameter parameters)
         {
-
+            BuyRequestDTO buyReq = new BuyRequestDTO();
             var buyRequest = await _buyRequestRepository.GetAllWithPaging(parameters);
 
             if (buyRequest.Count() == 0)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(buyReq);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -95,12 +95,12 @@ namespace BuyRequest.Application.Services
 
         public async Task<Domain.Entities.BuyRequest> GetById(Guid id)
         {
-
+            BuyRequestDTO buyReq = new BuyRequestDTO();
             var bankrec = await _buyRequestRepository.GetByIdAsync(id);
 
             if (bankrec == null)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(buyReq);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -108,17 +108,16 @@ namespace BuyRequest.Application.Services
             {
                 return bankrec;
             }
-
         }
 
         public async Task<Domain.Entities.BuyRequest> GetByClientIdAsync(Guid clientId)
         {
-
+            BuyRequestDTO buyReq = new BuyRequestDTO();
             var record = await _buyRequestRepository.GetAsync(x => x.ClientId == clientId);
 
             if (record == null)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(buyReq);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -130,29 +129,23 @@ namespace BuyRequest.Application.Services
 
         public async Task<Domain.Entities.BuyRequest> UpdateAsync(BuyRequestDTO buyinput)
         {
-
             var request = await _buyRequestRepository.GetByIdAsync(buyinput.Id);
 
             var oldStatus = request.Status;
 
             if (request == null)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(buyinput);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
 
             if (request.Status == Status.Finalized && buyinput.Status != Status.Finalized)
             {
-                var error = _buyRequestRepository.BadRequestMessage(buyReq, "You can only delete a finalized Request!");
+                var error = BadRequestMessage(buyinput, "You can only delete a finalized Request!");
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
-
-            //var Products = await _productRequestService.UpdateByProdIdAsync(buyinput);
-            //request.ProductPrices = Products;
-
-            //request.TotalPricing = request.ProductPrices - (request.ProductPrices * (request.Discount / 100));
 
             var mapperBuy = _mapper.Map<Domain.Entities.BuyRequest>(buyinput);
 
@@ -165,8 +158,8 @@ namespace BuyRequest.Application.Services
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                        buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyReq);
+                var errorList = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                        buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyinput);
 
                 var error = ErrorList(errorList);
                 throw new Exception(error);
@@ -175,24 +168,24 @@ namespace BuyRequest.Application.Services
             if (mapperBuy.Status == Status.Finalized)
             {
                 var type = BankRequest.Domain.Entities.Enum.Type.Receive;
-                var recentValue = mapperBuy.TotalPricing; //valor recente (total)
+                var recentValue = mapperBuy.TotalPricing;
                 string description = $"Financial transaction order id: {request.Id}";
 
-                if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && recentValue > request.TotalPricing /*&& totalValueOld > mapperBuy.TotalPricing*/)
+                if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && recentValue > request.TotalPricing)
                 {
                     description = $"Diference purchase order id: {request.Id}";
-                    recentValue = mapperBuy.TotalPricing - request.TotalPricing /*- totalValueOld*/;
+                    recentValue = mapperBuy.TotalPricing - request.TotalPricing;
                     type = BankRequest.Domain.Entities.Enum.Type.Receive;
                 }
-                else if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && request.TotalPricing  > recentValue)
+                else if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && request.TotalPricing > recentValue)
                 {
                     description = $"Diference purchase order id: {request.Id}";
-                    recentValue = mapperBuy.TotalPricing - request.TotalPricing /*- totalValueOld*/;
+                    recentValue = mapperBuy.TotalPricing - request.TotalPricing;
                     type = BankRequest.Domain.Entities.Enum.Type.Payment;
                 }
                 else
                 {
-                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was no change on the Total amount!");
+                    var result = BadRequestMessage(buyinput, "There was no change on the Total amount!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
@@ -202,50 +195,48 @@ namespace BuyRequest.Application.Services
 
                 if (response == false)
                 {
-                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var result = BadRequestMessage(buyinput, "There was an error while communicating with the BankRequestAPI, please try again!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
             }
 
             return mapperBuy;
-
         }
 
         public async Task<Domain.Entities.BuyRequest> ChangeState(Guid id, Status state)
         {
-
             var request = await _buyRequestRepository.GetByIdAsync(id);
+
+            var mapperBuy = _mapper.Map<BuyRequestDTO>(request);
 
             if (request == null)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(mapperBuy);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
 
             if (request.Status == Status.Finalized)
             {
-                var result = _buyRequestRepository.BadRequestMessage(buyReq, "You can only delete a finalized Request!");
+                var result = BadRequestMessage(mapperBuy, "You can only delete a finalized Request!");
                 var listError = ErrorList(result);
                 throw new Exception(listError);
             }
 
-            //await _productRequestService.ChangeStateProd(id, state);
-
             request.Status = state;
+            request.DeliveryDate = DateTimeOffset.UtcNow;
 
             await _buyRequestRepository.UpdateAsync(request);
 
             if (request.Status == Status.Finalized)
             {
-
                 var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, request.Id, $"Purshase order id: {request.Id}",
                     BankRequest.Domain.Entities.Enum.Type.Receive, request.TotalPricing);
 
                 if (response == false)
                 {
-                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
@@ -256,12 +247,13 @@ namespace BuyRequest.Application.Services
 
         public async Task<Domain.Entities.BuyRequest> DeleteById(Guid id)
         {
-
             var buyRequest = await _buyRequestRepository.GetByIdAsync(id);
+
+            var mapperBuy = _mapper.Map<BuyRequestDTO>(buyRequest);
 
             if (buyRequest == null)
             {
-                var error = _buyRequestRepository.NotFoundMessage(buyReq);
+                var error = NotFoundMessage(mapperBuy);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -270,17 +262,15 @@ namespace BuyRequest.Application.Services
 
             if (buyRequest.Status == Status.Finalized)
             {
-
                 var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, id, $"Revert Purshase order id: {buyRequest.Id}",
                     BankRequest.Domain.Entities.Enum.Type.Revert, -buyRequest.TotalPricing);
 
                 if (response == false)
                 {
-                    var result = _buyRequestRepository.BadRequestMessage(buyReq, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
-
             }
             return buyRequest;
         }

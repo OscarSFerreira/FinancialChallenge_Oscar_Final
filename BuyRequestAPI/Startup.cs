@@ -1,5 +1,7 @@
+using AutoMapper;
 using BankRequest.ClientApi.Configuration;
 using BuyRequest.Application.Interfaces;
+using BuyRequest.Application.Mapping;
 using BuyRequest.Application.Services;
 using BuyRequest.Data.Context;
 using BuyRequest.Data.Repository.BuyRequest;
@@ -39,13 +41,27 @@ namespace BuyRequestAPI
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddBankRequestConfiguration(Configuration);
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IBuyRequestRepository, BuyRequestRepository>();
             services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
             services.AddScoped<IBuyRequestService, BuyRequestService>();
             services.AddScoped<IProductRequestService, ProductRequestService>();
             //services.AddScoped<IBankRequestRepository, BankRequestRepository>();
+
+            //services.AddAutoMapper(cfg =>
+            //{
+            //    cfg.AddProfile(new BuyRequestMappingProfile());
+            //});
+
+            //services.AddAutoMapper(typeof(Program));
+            //    var config = new MapperConfiguration(cfg =>
+            //    {
+            //        cfg.AddProfile(new BuyRequestMappingProfile());
+            //    });
+            //var mapper = config.CreateMapper();
+            //services.AddSingleton(mapper);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

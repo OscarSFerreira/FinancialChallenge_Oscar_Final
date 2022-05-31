@@ -95,7 +95,7 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             buyReqService.Verify(x => x.UpdateAsync(It.IsAny<BuyRequestDTO>()), Times.Once());
         }
 
-        [Fact(DisplayName = "DeleteDocument Test")]
+        [Fact(DisplayName = "DeleteBuyRequest Test")]
         public async Task DeleteBuyRequest()
         {
             var buyReq = BuyRequestFaker.Generate();

@@ -13,14 +13,12 @@ namespace BuyRequest.UnitTest.AutoFaker
 
             Faker<ProductRequestDTO> prodReq = new Faker<ProductRequestDTO>()
                 .RuleFor(x => x.Id, Guid.NewGuid())
-                //.RuleFor(x => x.ProductId, Guid.NewGuid())
                 .RuleFor(x => x.ProductDescription, x => x.Random.String(1, 256))
                 .RuleFor(x => x.ProductCategory, x => x.PickRandom<ProductCategory>())
                 .RuleFor(x => x.ProductQuantity, x => x.Random.Int(1, 10))
                 .RuleFor(x => x.ProductPrice, x => x.Random.Decimal(1, 100));
 
             BuyRequestDTO buyReq = new Faker<BuyRequestDTO>()
-                //.RuleFor(x => x.Id, Guid.NewGuid())
                 .RuleFor(x => x.Code, x => x.Random.Number(1, 20000))
                 .RuleFor(x => x.Date, DateTime.UtcNow)
                 .RuleFor(x => x.DeliveryDate, DateTime.UtcNow)

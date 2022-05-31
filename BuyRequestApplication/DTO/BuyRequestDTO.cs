@@ -9,8 +9,8 @@ namespace BuyRequest.Application.DTO
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public long Code { get; set; }
-        public DateTime Date { get; set; }
-        public DateTime DeliveryDate { get; set; }
+        public DateTimeOffset Date { get; set; }
+        public DateTimeOffset? DeliveryDate { get; set; }
         public List<ProductRequestDTO> Products { get; set; }
         public Guid ClientId { get; set; }
         public string ClientDescription { get; set; }

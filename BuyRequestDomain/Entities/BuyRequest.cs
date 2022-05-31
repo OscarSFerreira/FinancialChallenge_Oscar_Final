@@ -10,7 +10,7 @@ namespace BuyRequest.Domain.Entities
 
         public long Code { get; set; }
         public DateTimeOffset Date { get; set; }
-        public DateTimeOffset DeliveryDate { get; set; }
+        public DateTimeOffset? DeliveryDate { get; set; }
         public Guid ClientId { get; set; }
         public string ClientDescription { get; set; }
         public string ClientEmail { get; set; }

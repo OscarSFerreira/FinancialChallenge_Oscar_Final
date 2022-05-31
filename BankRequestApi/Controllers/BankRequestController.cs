@@ -1,14 +1,7 @@
-﻿using AutoMapper;
-using BankRequest.Application.DTO;
+﻿using BankRequest.Application.DTO;
 using BankRequest.Application.Interfaces;
-using BankRequest.Application.ViewModel;
-using BankRequest.Data.Repository;
-using BankRequest.Domain.Validator;
-using BuyRequest.Data.Repository.BuyRequest;
-using Document.Data.Repository;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -23,15 +16,13 @@ namespace BankRequestAPI.Controllers
     {
 
         private readonly IBankRequestService _bankRequestService;
-        BankRequest.Domain.Entities.BankRequest bank = new BankRequest.Domain.Entities.BankRequest();
-        public List<string> errorList = new List<string>();
 
         public BankRequestController(IBankRequestService bankRequestService)
         {
             _bankRequestService = bankRequestService;
         }
 
-        [HttpPost("PostBankRequest")]
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] BankRequestDTO input)
         {
             try
@@ -41,14 +32,15 @@ namespace BankRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequest.Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, bank));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, input));
             }
 
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetByBankRequestId")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -58,13 +50,14 @@ namespace BankRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequest.Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, bank));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode(). //comentar isto tudo e meter apenas NoContent()
+                    ToString(), errorList, new BankRequestDTO()));
             }
         }
 
-        [HttpGet]
+        [HttpGet("GetAllBankRequest")]
         public async Task<IActionResult> GetAll([FromQuery] PageParameter parameters)
         {
             try
@@ -74,13 +67,14 @@ namespace BankRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequest.Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, bank));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode(). 
+                    ToString(), errorList, new BankRequestDTO()));
             }
         }
 
-        [HttpGet("GetByOriginId")]
+        [HttpGet("GetBankRequestByOriginId")]
         public async Task<IActionResult> GetByOriginId(Guid OriginId)
         {
             try
@@ -90,13 +84,14 @@ namespace BankRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequest.Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, bank));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new BankRequestDTO()));
             }
         }
 
-        [HttpPut("ChangeBankRequest/{id}")]
+        [HttpPut]
         public async Task<IActionResult> ChangeBankRequest(Guid id, [FromBody] BankRequestDTO bankRecord)
         {
             try
@@ -106,9 +101,10 @@ namespace BankRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequest.Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, bank));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, bankRecord));
             }
         }
 

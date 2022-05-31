@@ -1,11 +1,6 @@
-﻿using BuyRequest.Domain.Entities;
-using FluentValidation;
-using System;
-using System.Collections.Generic;
+﻿using FluentValidation;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BuyRequest.Domain.Validator
 {

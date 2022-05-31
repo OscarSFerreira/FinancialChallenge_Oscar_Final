@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace BankRequest.Application.ViewModel
+namespace BankRequest.Application.Model
 {
-    public class BankRequestViewModel
+    public class BankRequestModel
     {
 
         public IEnumerable<Domain.Entities.BankRequest> BankRecords { get; set; }

@@ -8,7 +8,6 @@ namespace BankRequest.Domain.Validator
         public BankRequestValidator()
         {
             RuleFor(x => x.Origin)
-                .NotNull().WithMessage("This field is required")
                 .IsInEnum().WithMessage("The Origin selected Invalid");
             RuleFor(x => x.Type)
                 .NotNull().WithMessage("This field is required")

@@ -17,8 +17,6 @@ namespace BuyRequestAPI.Controllers
     {
 
         private readonly IBuyRequestService _buyRequestService;
-        public BuyRequest.Domain.Entities.BuyRequest buyReq = new();
-        public List<string> errorList = new List<string>();
 
         public BuyRequestController(IBuyRequestService buyRequestService)
         {
@@ -36,9 +34,10 @@ namespace BuyRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, buyinput));
             }
         }
 
@@ -53,9 +52,10 @@ namespace BuyRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new BuyRequestDTO()));
             }
 
         }
@@ -71,9 +71,10 @@ namespace BuyRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new BuyRequestDTO()));
             }
 
         }
@@ -89,53 +90,30 @@ namespace BuyRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new BuyRequestDTO()));
             }
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateAsync([FromBody] BuyRequestDTO buyinput)
         {
-
             try
             {
                 var bank = await _buyRequestService.UpdateAsync(buyinput);
-
-                //if (request.Status == Status.Finalized)
-                //{
-                //    var type = DesafioFinanceiro_Oscar.Domain.Entities.Type.Receive;
-                //    var recentValue = mapperBuy.TotalPricing; //valor recente (total)
-                //    string description = $"Financial transaction order id: {request.Id}";
-
-                //    if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && totalValueOld > mapperBuy.TotalPricing)
-                //    {
-                //        description = $"Diference purchase order id: {request.Id}";
-                //        recentValue = mapperBuy.TotalPricing - totalValueOld;
-                //        type = DesafioFinanceiro_Oscar.Domain.Entities.Type.Payment;
-                //    }
-
-                //    var response = await _bankRecordRepository.CreateBankRecord(Origin.PurchaseRequest, mapperBuy.Id, description,
-                //        type, recentValue);
-
-                //    if (!response.IsSuccessStatusCode)
-                //    {
-                //        var result = _bankRecordRepository.BadRequestMessage(bank, response.Content.ToString());
-                //        return StatusCode((int)HttpStatusCode.BadRequest, result);
-                //    }
-                //}
 
                 return Ok(bank);
 
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, buyinput));
             }
-
         }
 
         [HttpPut("changeState/{id}")]
@@ -144,16 +122,15 @@ namespace BuyRequestAPI.Controllers
             try
             {
                 var request = await _buyRequestService.ChangeState(id, state);
-
                 return Ok(request);
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, null));
             }
-
         }
 
         [HttpDelete]
@@ -168,11 +145,11 @@ namespace BuyRequestAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, buyReq));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, null));
             }
-
         }
 
     }

@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using BankRequest.Application.DTO;
 using BankRequest.Application.Interfaces;
-using BankRequest.Application.ViewModel;
+using BankRequest.Application.Model;
 using BankRequest.Data.Repository;
-using BankRequest.Domain.Entities.Enum;
 using BankRequest.Domain.Validator;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
@@ -20,7 +19,6 @@ namespace BankRequest.Application.Services
 
         private readonly IBankRequestRepository _bankRequestRepository;
         private readonly IMapper _mapper;
-        Domain.Entities.BankRequest bank = new Domain.Entities.BankRequest();
 
         public BankRequestService(IBankRequestRepository bankRequestRepository, IMapper mapper)
         {
@@ -35,19 +33,14 @@ namespace BankRequest.Application.Services
             var validator = new BankRequestValidator();
             var valid = validator.Validate(mapper);
 
-            if (input.Origin == Origin.Null)
-            {
-                mapper.OriginId = null;
-            }
-
             if (valid.IsValid)
             {
                 await _bankRequestRepository.AddAsync(mapper);
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), bank);
+                var errorList = new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), input);
 
                 var error = ErrorList(errorList);
                 throw new Exception(error);
@@ -55,7 +48,7 @@ namespace BankRequest.Application.Services
 
         }
 
-        public string ErrorList(ErrorMessage<Domain.Entities.BankRequest> error)
+        public string ErrorList(ErrorMessage<BankRequestDTO> error)
         {
             var errorList = "";
 
@@ -66,16 +59,32 @@ namespace BankRequest.Application.Services
             return errorList;
         }
 
-        public async Task<BankRequestViewModel> GetAll(PageParameter parameters)
+        public ErrorMessage<BankRequestDTO> NotFoundMessage(BankRequestDTO entity)
         {
+            var errorList = new List<string>();
+            errorList.Add("This database does not contain the data you requested!");
+            var error = new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
 
-            BankRequestViewModel bankRecord = new BankRequestViewModel();
+        public ErrorMessage<BankRequestDTO> BadRequestMessage(BankRequestDTO entity, string msg)
+        {
+            var errorList = new List<string>();
+            errorList.Add(msg);
+            var error = new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
+
+        public async Task<BankRequestModel> GetAll(PageParameter parameters)
+        {
+            BankRequestDTO bank = new BankRequestDTO();
+            BankRequestModel bankRecord = new BankRequestModel();
 
             bankRecord.BankRecords = await _bankRequestRepository.GetAllWithPaging(parameters);
 
             if (bankRecord.BankRecords.Count() == 0)
             {
-                var error = _bankRequestRepository.NotFoundMessage(bank);
+                var error = NotFoundMessage(bank);
 
                 var listError = ErrorList(error);
                 throw new Exception(listError);
@@ -90,12 +99,12 @@ namespace BankRequest.Application.Services
 
         public async Task<Domain.Entities.BankRequest> GetById(Guid id)
         {
-
+            BankRequestDTO bank = new BankRequestDTO();
             var bankrec = await _bankRequestRepository.GetByIdAsync(id);
 
             if (bankrec == null)
             {
-                var error = _bankRequestRepository.NotFoundMessage(bank);
+                var error = NotFoundMessage(bank);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -104,12 +113,12 @@ namespace BankRequest.Application.Services
 
         public async Task<Domain.Entities.BankRequest> GetByOriginId(Guid originId)
         {
-
-            var bankrec = await _bankRequestRepository.GetAsync(x=>x.OriginId == originId);
+            BankRequestDTO bank = new BankRequestDTO();
+            var bankrec = await _bankRequestRepository.GetAsync(x => x.OriginId == originId);
 
             if (bankrec == null)
             {
-                var error = _bankRequestRepository.NotFoundMessage(bank);
+                var error = NotFoundMessage(bank);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -121,26 +130,23 @@ namespace BankRequest.Application.Services
             var bankReqUpdate = await _bankRequestRepository.GetByIdAsync(id);
             if (bankReqUpdate == null)
             {
-                var error = _bankRequestRepository.NotFoundMessage(bank);
+                var error = NotFoundMessage(bankRequest);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
 
-            if (bankReqUpdate.Origin == Origin.Null)
+            if (bankReqUpdate.Origin == null)
             {
-                bankReqUpdate.OriginId = null;
-                bankRequest.OriginId = null;
-                bankReqUpdate.Origin = Origin.Null;
-                bankRequest.Origin = Origin.Null;
+                bankRequest.Origin = null;
             }
             else if (bankReqUpdate.OriginId != null)
             {
-                var result = _bankRequestRepository.BadRequestMessage(bank, "The permissions do not allow you to change this data!");
+                var result = BadRequestMessage(bankRequest, "The permissions do not allow you to change this data!");
                 var error = ErrorList(result);
                 throw new Exception(error);
             }
 
-            var mapBankRecord = _mapper.Map(bankRequest, bankReqUpdate);
+            var mapBankRecord = _mapper.Map<Domain.Entities.BankRequest>(bankRequest);
 
             var validator = new BankRequestValidator();
             var valid = validator.Validate(mapBankRecord);
@@ -151,8 +157,8 @@ namespace BankRequest.Application.Services
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.BankRequest>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                 valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), bank);
+                var errorList = new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                 valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), bankRequest);
 
                 var error = ErrorList(errorList);
                 throw new Exception(error);

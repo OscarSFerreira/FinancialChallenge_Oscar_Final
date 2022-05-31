@@ -1,8 +1,5 @@
 ﻿using BankRequest.Data.Context;
 using FinancialChallenge_Oscar.Infrastructure.Repository.Generic;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
 
 namespace BankRequest.Data.Repository
 {

@@ -15,11 +15,6 @@ namespace BuyRequest.Domain.Validator
                .NotNull().WithMessage("Operation field is required")
                .IsInEnum().WithMessage("Invalid Product Category");
 
-            //When(x => x.ProductCategory == ProductCategory.Physical, () =>
-            //{
-            //    RuleFor(x => x.ProductCategory == );
-            //});
-
             RuleFor(x => x.ProductQuantity)
                .NotNull().WithMessage("Product Quantity field is required")
                .GreaterThan(0).WithMessage("Product Quantity must be higher than 0");
