@@ -7,7 +7,6 @@ namespace BuyRequest.Domain.Entities
 {
     public class BuyRequest : EntityBase
     {
-
         public long Code { get; set; }
         public DateTimeOffset Date { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
@@ -27,15 +26,14 @@ namespace BuyRequest.Domain.Entities
         public decimal CostPrice { get; set; }
         public decimal TotalPricing { get; set; }
 
-        private List<ProductRequest> _products = new List<ProductRequest>();
+        private List<ProductRequest> _buyRequestProducts = new List<ProductRequest>();
 
-        public List<ProductRequest> Products
+        public List<ProductRequest> BuyRequestProducts
         {
-            get { return _products; }
-            set { _products = value ?? new List<ProductRequest>(); }
+            get { return _buyRequestProducts; }
+            set { _buyRequestProducts = value ?? new List<ProductRequest>(); }
         }
 
         //public virtual ICollection<ProductRequest> Products { get; set; }
-
     }
 }

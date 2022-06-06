@@ -1,7 +1,5 @@
-using AutoMapper;
 using BankRequest.ClientApi.Configuration;
 using BuyRequest.Application.Interfaces;
-using BuyRequest.Application.Mapping;
 using BuyRequest.Application.Services;
 using BuyRequest.Data.Context;
 using BuyRequest.Data.Repository.BuyRequest;
@@ -30,16 +28,17 @@ namespace BuyRequestAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers().AddJsonOptions(options =>
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
-            services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
-            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BuyRequestAPI", Version = "v1" });
             });
             services.AddDbContext<BuyRequestContext>(cfg =>
             {
-                cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
+                cfg.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")).EnableSensitiveDataLogging();
             });
             services.AddBankRequestConfiguration(Configuration);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -47,7 +46,6 @@ namespace BuyRequestAPI
             services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
             services.AddScoped<IBuyRequestService, BuyRequestService>();
             services.AddScoped<IProductRequestService, ProductRequestService>();
-            //services.AddScoped<IBankRequestRepository, BankRequestRepository>();
 
             //services.AddAutoMapper(cfg =>
             //{
@@ -61,7 +59,6 @@ namespace BuyRequestAPI
             //    });
             //var mapper = config.CreateMapper();
             //services.AddSingleton(mapper);
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

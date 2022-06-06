@@ -14,12 +14,13 @@ namespace BankRequest.UnitTest.BankRequestTest
     public class BankRequestControllerTest
     {
         private readonly AutoMocker Mocker;
+
         public BankRequestControllerTest()
         {
             Mocker = new AutoMocker();
         }
 
-        [Fact(DisplayName = "PostBankRequest Test")]
+        [Fact(DisplayName = "ControllerPostBankRequest Test")]
         public async Task PostBankRequest()
         {
             var bankRequest = BankRequestFaker.GenerateBankReqDTO();
@@ -34,7 +35,7 @@ namespace BankRequest.UnitTest.BankRequestTest
             bankReqService.Verify(x => x.PostBankRecord(It.IsAny<BankRequestDTO>()), Times.Once());
         }
 
-        [Fact(DisplayName = "GetAllBankRequest Test")]
+        [Fact(DisplayName = "ControllerGetAllBankRequest Test")]
         public async Task GetAllBankRequest()
         {
             var bankReqService = Mocker.GetMock<IBankRequestService>();
@@ -49,7 +50,7 @@ namespace BankRequest.UnitTest.BankRequestTest
             bankReqService.Verify(x => x.GetAll(pageParameters), Times.Once());
         }
 
-        [Fact(DisplayName = "GetByIdBankRequest Test")]
+        [Fact(DisplayName = "ControllerGetByIdBankRequest Test")]
         public async Task GetByIdBankRequest()
         {
             var bankRequest = new Domain.Entities.BankRequest();
@@ -64,7 +65,7 @@ namespace BankRequest.UnitTest.BankRequestTest
             bankReqService.Verify(x => x.GetById(bankRequest.Id), Times.Once());
         }
 
-        [Fact(DisplayName = "GetByOriginIdBankRequest Test")]
+        [Fact(DisplayName = "ControllerGetByOriginIdBankRequest Test")]
         public async Task GetByOriginIdBankRequest()
         {
             var id = Guid.NewGuid();
@@ -81,7 +82,7 @@ namespace BankRequest.UnitTest.BankRequestTest
             bankReqService.Verify(x => x.GetByOriginId(id), Times.Once());
         }
 
-        [Fact(DisplayName = "UpdateBankRequest Test")]
+        [Fact(DisplayName = "ControllerUpdateBankRequest Test")]
         public async Task UpdateBankRequest()
         {
             var bankRequest = BankRequestFaker.GenerateBankReq();
@@ -96,7 +97,5 @@ namespace BankRequest.UnitTest.BankRequestTest
 
             bankReqService.Verify(x => x.ChangeBankRequest(bankRequest.Id, It.IsAny<BankRequestDTO>()), Times.Once());
         }
-
     }
-
 }

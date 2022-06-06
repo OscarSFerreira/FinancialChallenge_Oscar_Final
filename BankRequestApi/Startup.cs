@@ -1,4 +1,6 @@
+using AutoMapper;
 using BankRequest.Application.Interfaces;
+using BankRequest.Application.Mapping;
 using BankRequest.Application.Services;
 using BankRequest.ClientApi.Configuration;
 using BankRequest.Data.Context;
@@ -26,7 +28,6 @@ namespace BankRequestApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -36,12 +37,20 @@ namespace BankRequestApi
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddBankRequestConfiguration(Configuration);
             services.AddScoped<IBankRequestRepository, BankRequestRepository>();
             services.AddScoped<IBankRequestService, BankRequestService>();
             //services.AddScoped<IDocumentRepository, DocumentRepository>();
             //services.AddScoped<IBuyRequestRepository, BuyRequestRepository>();
+
+            services.AddAutoMapper(typeof(Program));
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new BankRequestMappingProfile());
+            });
+            var mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

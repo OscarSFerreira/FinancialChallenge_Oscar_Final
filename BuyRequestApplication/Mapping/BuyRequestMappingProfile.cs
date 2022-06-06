@@ -10,7 +10,6 @@ namespace BuyRequest.Application.Mapping
         {
             CreateMap<Domain.Entities.BuyRequest, BuyRequestDTO>().ReverseMap();
             CreateMap<Domain.Entities.ProductRequest, ProductRequestDTO>().ReverseMap();
-            CreateMap<BuyRequestDTO, Domain.Entities.BuyRequest>().ReverseMap();
         }
 
     }

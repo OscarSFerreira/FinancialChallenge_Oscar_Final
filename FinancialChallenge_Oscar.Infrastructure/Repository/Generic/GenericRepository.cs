@@ -1,6 +1,5 @@
 ﻿using FinancialChallenge_Oscar.Infrastructure.BaseClass;
 using FinancialChallenge_Oscar.Infrastructure.Context;
-using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -8,16 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
 {
-
     public class GenericRepository<T> : IGenericRepository<T> where T : EntityBase
     {
         private readonly DataContext _context;
-        public List<string> errorList = new List<string>();
         protected readonly DbSet<T> _dbSet;
         protected Func<IQueryable<T>, IIncludableQueryable<T, object>> _include;
 
@@ -34,60 +30,50 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
 
         public async Task AddAsync(T entity)
         {
-            await _context.Set<T>().AddAsync(entity);
+            await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(T entity)
         {
-            _context.Set<T>().Remove(entity);
+            _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
 
         public IQueryable<T> GetAll()
         {
-            return _context.Set<T>().AsNoTracking();
+            return _dbSet.AsNoTracking();
         }
 
         public async Task UpdateAsync(T entity)
         {
-            _context.Set<T>().Update(entity);
+            _dbSet.Update(entity);
             await _context.SaveChangesAsync();
         }
-        private async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
 
-        //public async Task<bool> ExistAsync(Guid id)
-        //{
-        //    return await _context.Set<T>().AnyAsync(x => x.Id == id);
-        //}
         public async Task<List<T>> GetAllWithPaging(PageParameter page)        //testar no geral
         {
             var query = _dbSet
                 .Skip((page.PageNumber - 1) * page.PageSize)
-                .Take(page.PageSize)
-                .AsNoTracking();
+                .Take(page.PageSize);
 
             if (_include != null)
             {
                 query = _include(query);
             }
-            return await query.ToListAsync();
+            return await query.AsNoTracking().ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(Guid id)
         {
             var query = _dbSet
-                .Where(e => e.Id == id)
-                .AsNoTracking();
+                .Where(e => e.Id == id);
 
             if (_include != null)
-            {
                 query = _include(query);
-            }
-            return await query.FirstOrDefaultAsync();
+            var result = await query.AsNoTracking().FirstOrDefaultAsync();
+
+            return result;
         }
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
@@ -96,26 +82,11 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
                 .Where(predicate);
 
             if (_include != null)
-            {
                 query = _include(query);
-            }
-            return await query.FirstOrDefaultAsync();
-        }
 
-        public ErrorMessage<T> BadRequestMessage(T entity, string msg)
-        {
-            errorList.Add(msg);
-            var error = new ErrorMessage<T>(HttpStatusCode.BadRequest.GetHashCode().ToString(), errorList, entity);
-            return error;
-        }
+            var result = await query.AsNoTracking().FirstOrDefaultAsync();
 
-        public ErrorMessage<T> NotFoundMessage(T entity)
-        {
-            errorList.Add("This database does not contain the data you requested!");
-            var error = new ErrorMessage<T>(HttpStatusCode.NotFound.GetHashCode().ToString(), errorList, entity);
-            return error;
+            return result;
         }
-
     }
-
 }

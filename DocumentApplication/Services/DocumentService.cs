@@ -22,9 +22,6 @@ namespace Document.Application.Services
         private readonly IDocumentRepository _documentRepository;
         public IBankRequestClient _bankRequestClient;
 
-        Domain.Entities.Document doc = new Domain.Entities.Document();
-
-
         public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IBankRequestClient bankRequestClient)
         {
             _mapper = mapper;
@@ -32,7 +29,7 @@ namespace Document.Application.Services
             _bankRequestClient = bankRequestClient;
         }
 
-        public string ErrorList(ErrorMessage<Domain.Entities.Document> error)
+        public string ErrorList(ErrorMessage<DocumentDTO> error)
         {
             var errorList = "";
 
@@ -41,6 +38,22 @@ namespace Document.Application.Services
                 errorList += item.ToString();
             }
             return errorList;
+        }
+
+        public ErrorMessage<DocumentDTO> NotFoundMessage(DocumentDTO entity)
+        {
+            var errorList = new List<string>();
+            errorList.Add("This database does not contain the data you requested!");
+            var error = new ErrorMessage<DocumentDTO>(HttpStatusCode.NoContent.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
+
+        public ErrorMessage<DocumentDTO> BadRequestMessage(DocumentDTO entity, string msg)
+        {
+            var errorList = new List<string>();
+            errorList.Add(msg);
+            var error = new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(), errorList, entity);
+            return error;
         }
 
         public async Task<Domain.Entities.Document> Post(DocumentDTO input)
@@ -71,22 +84,20 @@ namespace Document.Application.Services
 
                     if (response == false)
                     {
-                        var result = _documentRepository.BadRequestMessage(doc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                        var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
                         var listError = ErrorList(result);
                         throw new Exception(listError);
                     }
-
                 }
                 else
                 {
                     await _documentRepository.AddAsync(mapperDoc);
                 }
-
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), doc);
+                var errorList = new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), input);
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
@@ -95,52 +106,47 @@ namespace Document.Application.Services
 
         public async Task<IEnumerable<Domain.Entities.Document>> GetAll(PageParameter parameters)
         {
-
+            DocumentDTO doc = new DocumentDTO();
             var document = await _documentRepository.GetAllWithPaging(parameters);
 
             if (document.Count() == 0)
             {
-                var error = _documentRepository.NotFoundMessage(doc);
+                var error = NotFoundMessage(doc);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
-
             return document;
-
         }
 
         public async Task<Domain.Entities.Document> GetById(Guid id)
         {
-
+            DocumentDTO doc = new DocumentDTO();
             var document = await _documentRepository.GetByIdAsync(id);
 
             if (document == null)
             {
-                var error = _documentRepository.NotFoundMessage(doc);
+                var error = NotFoundMessage(doc);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
-
             return document;
-
         }
 
         public async Task<Domain.Entities.Document> ChangeDocument(Guid id, DocumentDTO input)
         {
-
             var document = await _documentRepository.GetByIdAsync(id);
             var totalValueOld = document.Total;
 
             if (document == null)
             {
-                var error = _documentRepository.NotFoundMessage(doc);
+                var error = NotFoundMessage(input);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
 
             if (document.Paid == true && input.Paid == false)
             {
-                var result = _documentRepository.BadRequestMessage(doc, "You can't change the state of a already payed Document");
+                var result = BadRequestMessage(input, "You can't change the state of a already payed Document");
                 var listError = ErrorList(result);
                 throw new Exception(listError);
             }
@@ -154,7 +160,6 @@ namespace Document.Application.Services
 
             if (valid.IsValid)
             {
-
                 if (document.Paid == false && input.Paid == true || TotalUpdated != totalValueOld && document.Paid == true)
                 {
                     string description = $"Diference Transaction in Document id: {document.Id}";
@@ -173,7 +178,7 @@ namespace Document.Application.Services
 
                     if (response == false)
                     {
-                        var result = _documentRepository.BadRequestMessage(doc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                        var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
                         var listError = ErrorList(result);
                         throw new Exception(listError);
                     }
@@ -185,29 +190,29 @@ namespace Document.Application.Services
             }
             else
             {
-                var errorList = new ErrorMessage<Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
-                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), doc);
+                var errorList = new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
+                    valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), input);
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
-
         }
 
         public async Task<Domain.Entities.Document> ChangeState(Guid id, bool Status)
         {
-
             var document = await _documentRepository.GetByIdAsync(id);
+
+            var mapperDoc = _mapper.Map<DocumentDTO>(document);
 
             if (document == null)
             {
-                var error = _documentRepository.NotFoundMessage(doc);
+                var error = NotFoundMessage(mapperDoc);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
 
             if (document.Paid == true)
             {
-                var result = _documentRepository.BadRequestMessage(doc, "You can only delete a finalized Document!");
+                var result = BadRequestMessage(mapperDoc, "You can only delete a finalized Document!");
                 var listError = ErrorList(result);
                 throw new Exception(listError);
             }
@@ -218,7 +223,6 @@ namespace Document.Application.Services
 
             if (document.Paid == true)
             {
-                //E SE FOR UMA DESPESA (TYPE.PAYMENT)?
                 var operationType = BankRequest.Domain.Entities.Enum.Type.Receive;
                 if (document.Operation == Operation.Exit)
                 {
@@ -230,23 +234,23 @@ namespace Document.Application.Services
 
                 if (response == false)
                 {
-                    var result = _documentRepository.BadRequestMessage(doc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
             }
-
             return document;
-
         }
 
         public async Task<Domain.Entities.Document> DeleteById(Guid id)
         {
             var document = await _documentRepository.GetByIdAsync(id);
 
+            var mapperDoc = _mapper.Map<DocumentDTO>(document);
+
             if (document == null)
             {
-                var error = _documentRepository.NotFoundMessage(doc);
+                var error = NotFoundMessage(mapperDoc);
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
@@ -257,20 +261,17 @@ namespace Document.Application.Services
 
             if (document.Paid == true)
             {
-
                 var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Revert Document order id: {document.Id}",
                     BankRequest.Domain.Entities.Enum.Type.Revert, -document.Total);
                 if (response == false)
                 {
-                    var result = _documentRepository.BadRequestMessage(doc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
-
             }
 
             return document;
         }
-
     }
 }

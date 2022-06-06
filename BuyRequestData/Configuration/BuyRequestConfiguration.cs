@@ -24,7 +24,9 @@ namespace BuyRequest.Data.Configuration
             builder.Property(x => x.DeliveryDate);
             builder.Property(x => x.Discount);
 
-            builder.HasMany(x => x.Products).WithOne(x => x.BuyRequest).HasForeignKey(x => x.BuyRequestId)/*.HasConstraintName("Fk_BuyRequests")*/;
+            builder.HasMany(x => x.BuyRequestProducts)
+                .WithOne(x => x.BuyRequest)
+                .HasForeignKey(x => x.BuyRequestId);
         }
     }
 }

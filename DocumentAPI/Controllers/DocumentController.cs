@@ -14,10 +14,7 @@ namespace DocumentAPI.Controllers
     [ApiController]
     public class DocumentController : ControllerBase
     {
-
         private readonly IDocumentService _documentService;
-        public List<string> errorList = new List<string>();
-        Document.Domain.Entities.Document doc = new Document.Domain.Entities.Document();
 
         public DocumentController(IDocumentService documentService)
         {
@@ -31,49 +28,47 @@ namespace DocumentAPI.Controllers
             {
                 var document = await _documentService.Post(input);
                 return Ok(document);
-
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, input));
             }
-
         }
 
-        [HttpGet]
+        [HttpGet("GetAllDocument")]
         public async Task<IActionResult> GetAll([FromQuery] PageParameter parameters)
         {
             try
             {
                 var document = await _documentService.GetAll(parameters);
-
                 return Ok(document);
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<DocumentDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new DocumentDTO()));
             }
-
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetDocumentById")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
                 var document = await _documentService.GetById(id);
-
                 return Ok(document);
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<DocumentDTO>(HttpStatusCode.NoContent.GetHashCode().
+                    ToString(), errorList, new DocumentDTO()));
             }
         }
 
@@ -87,11 +82,11 @@ namespace DocumentAPI.Controllers
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, input));
             }
-
         }
 
         [HttpPut("changeState/{id}")]
@@ -100,17 +95,15 @@ namespace DocumentAPI.Controllers
             try
             {
                 var document = await _documentService.ChangeState(id, Status);
-
                 return Ok(document);
-
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<DocumentDTO>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, null)); //perguntar ao pedro
             }
-
         }
 
         [HttpDelete]
@@ -119,17 +112,15 @@ namespace DocumentAPI.Controllers
             try
             {
                 var document = await _documentService.DeleteById(id);
-
                 return Ok(document);
-
             }
             catch (Exception ex)
             {
+                var errorList = new List<string>();
                 errorList.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<Document.Domain.Entities.Document>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, doc));
+                    ToString(), errorList, null));
             }
-
         }
 
     }

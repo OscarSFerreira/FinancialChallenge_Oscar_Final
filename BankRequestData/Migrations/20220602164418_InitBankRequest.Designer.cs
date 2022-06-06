@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankRequest.Data.Migrations
 {
     [DbContext(typeof(BankRequestContext))]
-    [Migration("20220516134434_InitDbBankRequest")]
-    partial class InitDbBankRequest
+    [Migration("20220602164418_InitBankRequest")]
+    partial class InitBankRequest
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.16")
+                .HasAnnotation("ProductVersion", "5.0.17")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("BankRequest.Domain.Entities.BankRequest", b =>

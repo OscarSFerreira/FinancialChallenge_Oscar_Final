@@ -11,12 +11,11 @@ namespace BuyRequest.Application.DTO
         public long Code { get; set; }
         public DateTimeOffset Date { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
-        public List<ProductRequestDTO> Products { get; set; }
         public Guid ClientId { get; set; }
         public string ClientDescription { get; set; }
         public string ClientEmail { get; set; }
         public string ClientPhone { get; set; }
-        public Status Status { get; set; } //Enum
+        public Status Status { get; set; } 
         public string Street { get; set; }
         public string StreetNum { get; set; }
         public string Sector { get; set; }
@@ -25,11 +24,19 @@ namespace BuyRequest.Application.DTO
         public string State { get; set; }
         public decimal Discount { get; set; }
         public decimal CostPrice { get; set; }
+
+        private List<ProductRequestDTO> _buyRequestProducts = new List<ProductRequestDTO>();
+
+        public List<ProductRequestDTO> BuyRequestProducts
+        {
+            get { return _buyRequestProducts; }
+            set { _buyRequestProducts = value ?? new List<ProductRequestDTO>(); }
+        }
+
         public decimal TotalPricing
-        => Products.Any() ? Products.Sum(x => x.ProductPrice * x.ProductQuantity) - Discount : 0;
+        => BuyRequestProducts.Any() ? BuyRequestProducts.Sum(x => x.ProductPrice * x.ProductQuantity) - Discount : 0;
 
         public decimal ProductPrices
-            => Products.Any() ? Products.Sum(x => x.ProductPrice * x.ProductQuantity) : 0;
-
+            => BuyRequestProducts.Any() ? BuyRequestProducts.Sum(x => x.ProductPrice * x.ProductQuantity) : 0;
     }
 }

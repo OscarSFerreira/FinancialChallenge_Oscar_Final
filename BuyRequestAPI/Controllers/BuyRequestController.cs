@@ -30,7 +30,6 @@ namespace BuyRequestAPI.Controllers
             {
                 var result = await _buyRequestService.Post(buyinput);
                 return Ok(result);
-
             }
             catch (Exception ex)
             {
@@ -41,14 +40,13 @@ namespace BuyRequestAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetBuyRequestById")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
                 var result = await _buyRequestService.GetById(id);
                 return Ok(result);
-
             }
             catch (Exception ex)
             {
@@ -57,7 +55,6 @@ namespace BuyRequestAPI.Controllers
                 return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
                     ToString(), errorList, new BuyRequestDTO()));
             }
-
         }
 
         [HttpGet]
@@ -65,7 +62,6 @@ namespace BuyRequestAPI.Controllers
         {
             try
             {
-
                 var result = await _buyRequestService.GetAll(parameters);
                 return Ok(result);
             }
@@ -76,7 +72,6 @@ namespace BuyRequestAPI.Controllers
                 return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
                     ToString(), errorList, new BuyRequestDTO()));
             }
-
         }
 
         [HttpGet("GetByClientIdAsync/{clientId}")]
@@ -86,7 +81,6 @@ namespace BuyRequestAPI.Controllers
             {
                 var result = await _buyRequestService.GetByClientIdAsync(clientId);
                 return Ok(result);
-
             }
             catch (Exception ex)
             {
@@ -103,9 +97,7 @@ namespace BuyRequestAPI.Controllers
             try
             {
                 var bank = await _buyRequestService.UpdateAsync(buyinput);
-
                 return Ok(bank);
-
             }
             catch (Exception ex)
             {
@@ -129,7 +121,7 @@ namespace BuyRequestAPI.Controllers
                 var errorList = new List<string>();
                 errorList.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, null));
+                    ToString(), errorList, null)); //perguntar ao pedro
             }
         }
 
@@ -139,16 +131,14 @@ namespace BuyRequestAPI.Controllers
             try
             {
                 var buyRequest = await _buyRequestService.DeleteById(id);
-
                 return Ok(buyRequest);
-
             }
             catch (Exception ex)
             {
                 var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
-                    ToString(), errorList, null));
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BuyRequest.Domain.Entities.BuyRequest>(HttpStatusCode.BadRequest.GetHashCode().
+                    ToString(), errorList, null)); //perguntar ao pedro
             }
         }
 

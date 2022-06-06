@@ -4,6 +4,7 @@ using BankRequest.Domain.Entities.Enum;
 using BuyRequest.Application.DTO;
 using BuyRequest.Application.Interfaces;
 using BuyRequest.Data.Repository.BuyRequest;
+using BuyRequest.Data.Repository.ProductRequest;
 using BuyRequest.Domain.Entities.Enum;
 using BuyRequest.Domain.Validator;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
@@ -21,12 +22,16 @@ namespace BuyRequest.Application.Services
         private readonly IBuyRequestRepository _buyRequestRepository;
         private readonly IMapper _mapper;
         public IBankRequestClient _bankRequestClient;
+        public IProductRequestRepository _productRequestRepository;
+        public IProductRequestService _productRequestService;
 
-        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IMapper mapper, IBankRequestClient bankRequestClient)
+        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IMapper mapper, IBankRequestClient bankRequestClient, IProductRequestRepository productRequestRepository, IProductRequestService productRequestService)
         {
             _buyRequestRepository = buyRequestRepository;
             _mapper = mapper;
             _bankRequestClient = bankRequestClient;
+            _productRequestRepository = productRequestRepository;
+            _productRequestService = productRequestService;
         }
 
         public string ErrorList(ErrorMessage<BuyRequestDTO> error)
@@ -63,6 +68,11 @@ namespace BuyRequest.Application.Services
             var buyValidator = new BuyRequestValidator();
             var buyValid = buyValidator.Validate(mapperBuy);
 
+            if (mapperBuy.Status == Status.Received)
+            {
+                mapperBuy.DeliveryDate = DateTimeOffset.MinValue;
+            }
+
             if (buyValid.IsValid)
             {
                 await _buyRequestRepository.AddAsync(mapperBuy);
@@ -71,7 +81,6 @@ namespace BuyRequest.Application.Services
             {
                 var errorList = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
                         buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyinput);
-
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
@@ -89,7 +98,6 @@ namespace BuyRequest.Application.Services
                 var listError = ErrorList(error);
                 throw new Exception(listError);
             }
-
             return buyRequest;
         }
 
@@ -129,9 +137,8 @@ namespace BuyRequest.Application.Services
 
         public async Task<Domain.Entities.BuyRequest> UpdateAsync(BuyRequestDTO buyinput)
         {
+            //var request = await _buyRequestRepository.GetAsync(w => w.Id == buyinput.Id);
             var request = await _buyRequestRepository.GetByIdAsync(buyinput.Id);
-
-            var oldStatus = request.Status;
 
             if (request == null)
             {
@@ -154,13 +161,23 @@ namespace BuyRequest.Application.Services
 
             if (buyValid.IsValid)
             {
+                var buyReqProdId = buyinput.BuyRequestProducts.Select(x => x.Id).ToList();
+                var result = _productRequestService.GetAllProducts().Result.Where(x => x.BuyRequestId == buyinput.Id);
+                var prodDelete = result.Where(x => !buyReqProdId.Contains(x.Id)).ToList();
+                //var prodDelete = request.BuyRequestProducts.Where(x => !mapperBuy.BuyRequestProducts.Any(z => z.Id == x.Id)).ToList();
+
+                foreach (var prods in prodDelete)
+                {
+                    var prod = _productRequestRepository.GetByIdAsync(prods.Id).Result;
+                    await _productRequestRepository.DeleteAsync(prod);
+                }
+
                 await _buyRequestRepository.UpdateAsync(mapperBuy);
             }
             else
             {
                 var errorList = new ErrorMessage<BuyRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
                         buyValid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), buyinput);
-
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
@@ -170,6 +187,7 @@ namespace BuyRequest.Application.Services
                 var type = BankRequest.Domain.Entities.Enum.Type.Receive;
                 var recentValue = mapperBuy.TotalPricing;
                 string description = $"Financial transaction order id: {request.Id}";
+                var oldStatus = request.Status;
 
                 if (mapperBuy.Status == oldStatus && mapperBuy.Status == Status.Finalized && recentValue > request.TotalPricing)
                 {
@@ -200,7 +218,6 @@ namespace BuyRequest.Application.Services
                     throw new Exception(listError);
                 }
             }
-
             return mapperBuy;
         }
 
@@ -240,7 +257,6 @@ namespace BuyRequest.Application.Services
                     var listError = ErrorList(result);
                     throw new Exception(listError);
                 }
-
             }
             return request;
         }

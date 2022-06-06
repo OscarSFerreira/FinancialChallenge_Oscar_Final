@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BuyRequest.Data.Configuration
 {
-    public class ProductRequestConfiguration : IEntityTypeConfiguration<Domain.Entities.ProductRequest>
+    public class ProductRequestConfiguration : IEntityTypeConfiguration<ProductRequest>
     {
         public void Configure(EntityTypeBuilder<ProductRequest> builder)
         {

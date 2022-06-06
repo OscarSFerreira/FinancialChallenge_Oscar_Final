@@ -13,6 +13,7 @@ namespace BuyRequest.UnitTest.BuyRequestTest
     public class BuyRequestControllerTest
     {
         private readonly AutoMocker Mocker;
+
         public BuyRequestControllerTest()
         {
             Mocker = new AutoMocker();
@@ -21,7 +22,7 @@ namespace BuyRequest.UnitTest.BuyRequestTest
         [Fact(DisplayName = "PostBuyRequest Test")]
         public async Task PostBuyRequest()
         {
-            var buyReq = BuyRequestFaker.Generate();
+            var buyReq = BuyRequestFaker.GenerateDTO();
 
             var buyReqService = Mocker.GetMock<IBuyRequestService>();
             buyReqService.Setup(X => X.Post(buyReq));
@@ -78,11 +79,10 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             buyReqService.Verify(x => x.GetByClientIdAsync(buyReq.ClientId), Times.Once());
         }
 
-        [Fact(DisplayName = "UpdateBankRequest Test")]
-
+        [Fact(DisplayName = "UpdateBuyRequest Test")]
         public async Task UpdateBankRequest()
         {
-            var buyReq = BuyRequestFaker.Generate();
+            var buyReq = BuyRequestFaker.GenerateDTO();
 
             var buyReqService = Mocker.GetMock<IBuyRequestService>();
             buyReqService.Setup(x => x.GetById(buyReq.Id));
@@ -109,6 +109,5 @@ namespace BuyRequest.UnitTest.BuyRequestTest
 
             buyReqService.Verify(x => x.DeleteById(buyReq.Id), Times.Once());
         }
-
     }
 }

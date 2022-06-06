@@ -14,7 +14,6 @@ namespace BankRequestAPI.Controllers
     [ApiController]
     public class BankRequestController : ControllerBase
     {
-
         private readonly IBankRequestService _bankRequestService;
 
         public BankRequestController(IBankRequestService bankRequestService)
@@ -37,7 +36,6 @@ namespace BankRequestAPI.Controllers
                 return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().
                     ToString(), errorList, input));
             }
-
         }
 
         [HttpGet("GetByBankRequestId")]
@@ -69,7 +67,7 @@ namespace BankRequestAPI.Controllers
             {
                 var errorList = new List<string>();
                 errorList.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode(). 
+                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorMessage<BankRequestDTO>(HttpStatusCode.NoContent.GetHashCode().
                     ToString(), errorList, new BankRequestDTO()));
             }
         }
@@ -107,6 +105,5 @@ namespace BankRequestAPI.Controllers
                     ToString(), errorList, bankRecord));
             }
         }
-
     }
 }

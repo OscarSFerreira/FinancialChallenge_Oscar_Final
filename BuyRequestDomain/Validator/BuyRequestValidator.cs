@@ -6,7 +6,6 @@ namespace BuyRequest.Domain.Validator
 {
     public class BuyRequestValidator : AbstractValidator<Entities.BuyRequest>
     {
-
         public BuyRequestValidator()
         {
             RuleFor(x => x.Code)
@@ -26,8 +25,7 @@ namespace BuyRequest.Domain.Validator
                .NotEmpty()
                .NotNull().WithMessage("Phone Number is required.")
                .MinimumLength(9).WithMessage("Phone Number must have more than 9 characters.")
-               .MaximumLength(11).WithMessage("Phone Number must have less than 11 characters.")
-               .Matches(new Regex(@"(9[1236][0-9]) ?([0-9]{3}) ?([0-9]{3})")).WithMessage("PhoneNumber not valid");
+               .Matches(new Regex(@"^(\+?351)?\s?(9[1236]\d) ?(\d{3}) ?(\d{3})")).WithMessage("PhoneNumber not valid");
 
             RuleFor(x => x.Status)
                .NotNull().WithMessage("Satus field is required")
@@ -46,12 +44,11 @@ namespace BuyRequest.Domain.Validator
             RuleFor(x => x.TotalPricing)
                .NotNull().WithMessage("Total Value field is required");
 
-            RuleForEach(x => x.Products).SetValidator(new ProductRequestValidator());
+            RuleForEach(x => x.BuyRequestProducts).SetValidator(new ProductRequestValidator());
 
-            RuleFor(x => x.Products).Must(x => x.GroupBy(p => p.ProductCategory).Count() == 1)
+            RuleFor(x => x.BuyRequestProducts)
+                .Must(x => x.GroupBy(p => p.ProductCategory).Count() == 1)
                 .WithMessage("There can only be one category of Products!");
-
-            //RuleFor(x => x.Status).Must(x => )
         }
     }
 }

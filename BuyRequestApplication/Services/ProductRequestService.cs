@@ -5,6 +5,7 @@ using BuyRequest.Data.Repository.ProductRequest;
 using BuyRequest.Domain.Entities.Enum;
 using BuyRequest.Domain.Validator;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
+using FinancialChallenge_Oscar.Infrastructure.Paging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace BuyRequest.Application.Services
     {
         private readonly IProductRequestRepository _productRequestRepository;
         private readonly IMapper _mapper;
-        Domain.Entities.ProductRequest prodReq = new();
 
         public ProductRequestService(IProductRequestRepository productRequestRepository, IMapper mapper)
         {
@@ -25,16 +25,46 @@ namespace BuyRequest.Application.Services
             _mapper = mapper;
         }
 
-        //public string ErrorList(ErrorMessage<Domain.Entities.ProductRequest> error)
-        //{
-        //    var errorList = "";
+        public string ErrorList(ErrorMessage<ProductRequestDTO> error)
+        {
+            var errorList = "";
 
-        //    foreach (var item in error.Message)
-        //    {
-        //        errorList += item.ToString();
-        //    }
-        //    return errorList;
-        //}
+            foreach (var item in error.Message)
+            {
+                errorList += item.ToString() + " ";
+            }
+            return errorList;
+        }
+
+        public ErrorMessage<ProductRequestDTO> NotFoundMessage(ProductRequestDTO entity)
+        {
+            var errorList = new List<string>();
+            errorList.Add("This database does not contain the data you requested!");
+            var error = new ErrorMessage<ProductRequestDTO>(HttpStatusCode.NoContent.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
+
+        public ErrorMessage<ProductRequestDTO> BadRequestMessage(ProductRequestDTO entity, string msg)
+        {
+            var errorList = new List<string>();
+            errorList.Add(msg);
+            var error = new ErrorMessage<ProductRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(), errorList, entity);
+            return error;
+        }
+
+        public async Task<IEnumerable<Domain.Entities.ProductRequest>> GetAllProducts()
+        {
+            ProductRequestDTO prodReq = new ProductRequestDTO();
+            var prodRequest = _productRequestRepository.GetAll().ToList();
+
+            if (prodRequest.Count() == 0)
+            {
+                var error = NotFoundMessage(prodReq);
+                var listError = ErrorList(error);
+                throw new Exception(listError);
+            }
+            return prodRequest;
+        }
 
         //public async Task<decimal> PostProduct(List<ProductRequestDTO> prodInput, Guid RequestId)
         //{
@@ -117,7 +147,6 @@ namespace BuyRequest.Application.Services
         //    {
         //        for (int i = products.Count(); i < buyRequest.Products.Count(); i++)
         //        {
-
         //            var mapperProd = _mapper.Map(buyRequest.Products[i], prodReq);
 
         //            mapperProd.BuyRequestId = id;
@@ -201,7 +230,5 @@ namespace BuyRequest.Application.Services
         //    }
 
         //}
-
     }
-
 }

@@ -16,7 +16,6 @@ namespace BankRequest.Application.Services
 {
     public class BankRequestService : IBankRequestService
     {
-
         private readonly IBankRequestRepository _bankRequestRepository;
         private readonly IMapper _mapper;
 
@@ -41,11 +40,9 @@ namespace BankRequest.Application.Services
             {
                 var errorList = new ErrorMessage<BankRequestDTO>(HttpStatusCode.BadRequest.GetHashCode().ToString(),
                     valid.Errors.ConvertAll(x => x.ErrorMessage.ToString()), input);
-
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
-
         }
 
         public string ErrorList(ErrorMessage<BankRequestDTO> error)
@@ -54,7 +51,7 @@ namespace BankRequest.Application.Services
 
             foreach (var item in error.Message)
             {
-                errorList += item.ToString();
+                errorList += " " + item.ToString();
             }
             return errorList;
         }
@@ -148,12 +145,14 @@ namespace BankRequest.Application.Services
 
             var mapBankRecord = _mapper.Map<Domain.Entities.BankRequest>(bankRequest);
 
+            mapBankRecord.Id = id;
+
             var validator = new BankRequestValidator();
             var valid = validator.Validate(mapBankRecord);
 
             if (valid.IsValid)
             {
-                await _bankRequestRepository.UpdateAsync(bankReqUpdate);
+                await _bankRequestRepository.UpdateAsync(mapBankRecord);
             }
             else
             {
@@ -163,8 +162,7 @@ namespace BankRequest.Application.Services
                 var error = ErrorList(errorList);
                 throw new Exception(error);
             }
-            return bankReqUpdate;
+            return mapBankRecord;
         }
-
     }
 }
