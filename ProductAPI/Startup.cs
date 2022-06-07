@@ -1,18 +1,16 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Product.Application.Interfaces;
+using Product.Application.Mapping;
+using Product.Application.Services;
 using Product.Data.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Product.Data.Repository;
 
 namespace ProductAPI
 {
@@ -28,7 +26,6 @@ namespace ProductAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -38,8 +35,15 @@ namespace ProductAPI
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddAutoMapper(typeof(Program));
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new ProductMappingProfile());
+            });
+            var mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

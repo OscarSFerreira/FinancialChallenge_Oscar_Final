@@ -51,7 +51,7 @@ namespace FinancialChallenge_Oscar.Infrastructure.Repository.Generic
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<T>> GetAllWithPaging(PageParameter page)        //testar no geral
+        public async Task<List<T>> GetAllWithPaging(PageParameter page)
         {
             var query = _dbSet
                 .Skip((page.PageNumber - 1) * page.PageSize)

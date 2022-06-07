@@ -36,16 +36,16 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             var buyReq = BuyRequestFaker.GenerateDTO();
             var mapper = _mapper.Map<Domain.Entities.BuyRequest>(buyReq);
 
-            var buyReqService = Mocker.GetMock<IBuyRequestRepository>();
+            var buyReqRepository = Mocker.GetMock<IBuyRequestRepository>();
             var mockMapper = Mocker.GetMock<IMapper>();
 
             mockMapper.Setup(x => x.Map<Domain.Entities.BuyRequest>(It.IsAny<BuyRequestDTO>())).Returns(mapper);
 
-            var buyReqController = Mocker.CreateInstance<BuyRequestService>();
+            var buyReqService = Mocker.CreateInstance<BuyRequestService>();
 
-            await buyReqController.Post(buyReq);
+            await buyReqService.Post(buyReq);
 
-            buyReqService.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.BuyRequest>()), Times.Once());
+            buyReqRepository.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.BuyRequest>()), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceGetAllBuyRequest Test")]
@@ -54,14 +54,14 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             PageParameter pageParameters = new PageParameter();
             var buyRequest = BuyRequestFaker.GenerateList();
 
-            var buyReqService = Mocker.GetMock<IBuyRequestRepository>();
-            buyReqService.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(buyRequest);
+            var buyReqRepository = Mocker.GetMock<IBuyRequestRepository>();
+            buyReqRepository.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(buyRequest);
 
-            var bankReqController = Mocker.CreateInstance<BuyRequestService>();
+            var buyReqService = Mocker.CreateInstance<BuyRequestService>();
 
-            await bankReqController.GetAll(pageParameters);
+            await buyReqService.GetAll(pageParameters);
 
-            buyReqService.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
+            buyReqRepository.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceGetByIdBuyRequest Test")]
@@ -69,14 +69,14 @@ namespace BuyRequest.UnitTest.BuyRequestTest
         {
             var buyRequest = new Domain.Entities.BuyRequest();
 
-            var buyReqService = Mocker.GetMock<IBuyRequestRepository>();
-            buyReqService.Setup(x => x.GetByIdAsync(buyRequest.Id)).ReturnsAsync(buyRequest);
+            var buyReqRepository = Mocker.GetMock<IBuyRequestRepository>();
+            buyReqRepository.Setup(x => x.GetByIdAsync(buyRequest.Id)).ReturnsAsync(buyRequest);
 
-            var buyReqController = Mocker.CreateInstance<BuyRequestService>();
+            var buyReqService = Mocker.CreateInstance<BuyRequestService>();
 
-            await buyReqController.GetById(buyRequest.Id);
+            await buyReqService.GetById(buyRequest.Id);
 
-            buyReqService.Verify(x => x.GetByIdAsync(buyRequest.Id), Times.Once());
+            buyReqRepository.Verify(x => x.GetByIdAsync(buyRequest.Id), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceUpdateBuyRequest Test")]
@@ -85,18 +85,18 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             var buyRequest = BuyRequestFaker.Generate();
             var mapper = _mapper.Map<BuyRequestDTO>(buyRequest);
 
-            var BuyReqService = Mocker.GetMock<IBuyRequestRepository>();
+            var buyReqRepository = Mocker.GetMock<IBuyRequestRepository>();
             var mockMapper = Mocker.GetMock<IMapper>();
 
-            BuyReqService.Setup(x => x.GetByIdAsync(buyRequest.Id)).ReturnsAsync(buyRequest);
-            BuyReqService.Setup(X => X.UpdateAsync(buyRequest));
+            buyReqRepository.Setup(x => x.GetByIdAsync(buyRequest.Id)).ReturnsAsync(buyRequest);
+            buyReqRepository.Setup(X => X.UpdateAsync(buyRequest));
             mockMapper.Setup(x => x.Map<Domain.Entities.BuyRequest>(It.IsAny<BuyRequestDTO>())).Returns(buyRequest);
 
-            var bankReqController = Mocker.CreateInstance<BuyRequestService>();
+            var buyReqService = Mocker.CreateInstance<BuyRequestService>();
 
-            await bankReqController.UpdateAsync(mapper);
+            await buyReqService.UpdateAsync(mapper);
 
-            BuyReqService.Verify(x => x.UpdateAsync(buyRequest), Times.Once());
+            buyReqRepository.Verify(x => x.UpdateAsync(buyRequest), Times.Once());
         }
 
         [Fact(DisplayName = "DeleteBuyRequest Test")]
@@ -105,18 +105,18 @@ namespace BuyRequest.UnitTest.BuyRequestTest
             var buyReq = BuyRequestFaker.Generate();
             var mapper = _mapper.Map<BuyRequestDTO>(buyReq);
 
-            var buyReqService = Mocker.GetMock<IBuyRequestRepository>();
+            var buyReqRepository = Mocker.GetMock<IBuyRequestRepository>();
             var mockMapper = Mocker.GetMock<IMapper>();
 
-            buyReqService.Setup(x => x.GetByIdAsync(buyReq.Id)).ReturnsAsync(buyReq);
-            buyReqService.Setup(x => x.DeleteAsync(buyReq));
+            buyReqRepository.Setup(x => x.GetByIdAsync(buyReq.Id)).ReturnsAsync(buyReq);
+            buyReqRepository.Setup(x => x.DeleteAsync(buyReq));
             mockMapper.Setup(x => x.Map<BuyRequestDTO>(It.IsAny<Domain.Entities.BuyRequest>())).Returns(mapper);
 
-            var buyReqController = Mocker.CreateInstance<BuyRequestService>();
+            var buyReqService = Mocker.CreateInstance<BuyRequestService>();
 
-            await buyReqController.DeleteById(mapper.Id);
+            await buyReqService.DeleteById(mapper.Id);
 
-            buyReqService.Verify(x => x.DeleteAsync(buyReq), Times.Once());
+            buyReqRepository.Verify(x => x.DeleteAsync(buyReq), Times.Once());
         }
     }
 }

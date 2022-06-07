@@ -10,8 +10,8 @@ using Product.Data.Context;
 namespace Product.Data.Migrations
 {
     [DbContext(typeof(ProductContext))]
-    [Migration("20220526150321_InitProduct")]
-    partial class InitProduct
+    [Migration("20220607110306_InitProductList")]
+    partial class InitProductList
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

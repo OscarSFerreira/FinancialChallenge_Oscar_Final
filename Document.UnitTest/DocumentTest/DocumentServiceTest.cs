@@ -41,7 +41,7 @@ namespace Document.UnitTest.DocumentTest
             mockMapper.Setup(x => x.Map<Domain.Entities.Document>(It.IsAny<DocumentDTO>())).Returns(mapper);
             var docReqService = Mocker.CreateInstance<DocumentService>();
 
-            await docReqService.Post(docRequest); //ver validators
+            await docReqService.Post(docRequest);
 
             docReqRepository.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.Document>()), Times.Once());
         }
@@ -52,14 +52,14 @@ namespace Document.UnitTest.DocumentTest
             PageParameter pageParameters = new PageParameter();
             var docRequest = DocumentFaker.GenerateDocList();
 
-            var docReqService = Mocker.GetMock<IDocumentRepository>();
-            docReqService.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(docRequest);
+            var docReqRepository = Mocker.GetMock<IDocumentRepository>();
+            docReqRepository.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(docRequest);
 
-            var docReqController = Mocker.CreateInstance<DocumentService>();
+            var docReqService = Mocker.CreateInstance<DocumentService>();
 
-            await docReqController.GetAll(pageParameters);
+            await docReqService.GetAll(pageParameters);
 
-            docReqService.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
+            docReqRepository.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceGetByIdDocument Test")]
@@ -67,14 +67,14 @@ namespace Document.UnitTest.DocumentTest
         {
             var docRequest = new Domain.Entities.Document();
 
-            var docReqService = Mocker.GetMock<IDocumentRepository>();
-            docReqService.Setup(x => x.GetByIdAsync(docRequest.Id)).ReturnsAsync(docRequest);
+            var docReqRepository = Mocker.GetMock<IDocumentRepository>();
+            docReqRepository.Setup(x => x.GetByIdAsync(docRequest.Id)).ReturnsAsync(docRequest);
 
-            var docReqController = Mocker.CreateInstance<DocumentService>();
+            var docReqService = Mocker.CreateInstance<DocumentService>();
 
-            await docReqController.GetById(docRequest.Id);
+            await docReqService.GetById(docRequest.Id);
 
-            docReqService.Verify(x => x.GetByIdAsync(docRequest.Id), Times.Once());
+            docReqRepository.Verify(x => x.GetByIdAsync(docRequest.Id), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceUpdateDocument Test")]
@@ -83,18 +83,38 @@ namespace Document.UnitTest.DocumentTest
             var docRequest = DocumentFaker.GenerateDoc();
             var mapper = _mapper.Map<DocumentDTO>(docRequest);
 
-            var docReqService = Mocker.GetMock<IDocumentRepository>();
+            var docReqRepository = Mocker.GetMock<IDocumentRepository>();
             var mockMapper = Mocker.GetMock<IMapper>();
 
-            docReqService.Setup(x => x.GetByIdAsync(docRequest.Id)).ReturnsAsync(docRequest);
-            docReqService.Setup(X => X.UpdateAsync(docRequest));
+            docReqRepository.Setup(x => x.GetByIdAsync(docRequest.Id)).ReturnsAsync(docRequest);
+            docReqRepository.Setup(X => X.UpdateAsync(docRequest));
             mockMapper.Setup(x => x.Map<Domain.Entities.Document>(It.IsAny<DocumentDTO>())).Returns(docRequest);
 
-            var docReqController = Mocker.CreateInstance<DocumentService>();
+            var docReqService = Mocker.CreateInstance<DocumentService>();
 
-            await docReqController.ChangeDocument(docRequest.Id, mapper);
+            await docReqService.ChangeDocument(docRequest.Id, mapper);
 
-            docReqService.Verify(x => x.UpdateAsync(docRequest), Times.Once());
+            docReqRepository.Verify(x => x.UpdateAsync(docRequest), Times.Once());
+        }
+
+        [Fact(DisplayName = "DeleteDocument Test")]
+        public async Task DeleteDocument()
+        {
+            var docReq = DocumentFaker.GenerateDoc();
+            var mapper = _mapper.Map<DocumentDTO>(docReq);
+
+            var docReqRepository = Mocker.GetMock<IDocumentRepository>();
+            var mockMapper = Mocker.GetMock<IMapper>();
+
+            docReqRepository.Setup(x => x.GetByIdAsync(docReq.Id)).ReturnsAsync(docReq);
+            docReqRepository.Setup(x => x.DeleteAsync(docReq));
+            mockMapper.Setup(x => x.Map<DocumentDTO>(It.IsAny<Domain.Entities.Document>())).Returns(mapper);
+
+            var docReqService = Mocker.CreateInstance<DocumentService>();
+
+            await docReqService.DeleteById(docReq.Id);
+
+            docReqRepository.Verify(x => x.DeleteAsync(docReq), Times.Once());
         }
     }
 }

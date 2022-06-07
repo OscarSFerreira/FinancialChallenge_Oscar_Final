@@ -37,13 +37,9 @@ namespace BankRequestApi
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddBankRequestConfiguration(Configuration);
             services.AddScoped<IBankRequestRepository, BankRequestRepository>();
             services.AddScoped<IBankRequestService, BankRequestService>();
-            //services.AddScoped<IDocumentRepository, DocumentRepository>();
-            //services.AddScoped<IBuyRequestRepository, BuyRequestRepository>();
-
             services.AddAutoMapper(typeof(Program));
             var config = new MapperConfiguration(cfg =>
             {

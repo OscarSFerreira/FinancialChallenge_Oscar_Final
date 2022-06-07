@@ -20,7 +20,7 @@ namespace Document.UnitTest.DocumentTest
         }
 
         [Fact(DisplayName = "PostDocument Test")]
-        public async Task PostBuyRequest()
+        public async Task PostDocument()
         {
             var docReq = DocumentFaker.GenerateDocDTO();
 
@@ -35,7 +35,7 @@ namespace Document.UnitTest.DocumentTest
         }
 
         [Fact(DisplayName = "GetAllDocument Test")]
-        public async Task GetAllBuyRequest()
+        public async Task GetAllDocument()
         {
             var docReqService = Mocker.GetMock<IDocumentService>();
             docReqService.Setup(x => x.GetAll(null));
@@ -50,18 +50,18 @@ namespace Document.UnitTest.DocumentTest
         }
 
         [Fact(DisplayName = "GetByIdDocument Test")]
-        public async Task GetByIdBuyRequest()
+        public async Task GetByIdDocument()
         {
             var docReq = DocumentFaker.GenerateDoc();
 
-            var buyReqService = Mocker.GetMock<IDocumentService>();
-            buyReqService.Setup(x => x.GetById(docReq.Id));
+            var docReqService = Mocker.GetMock<IDocumentService>();
+            docReqService.Setup(x => x.GetById(docReq.Id));
 
-            var buyReqController = Mocker.CreateInstance<DocumentController>();
+            var docReqController = Mocker.CreateInstance<DocumentController>();
 
-            await buyReqController.GetById(docReq.Id);
+            await docReqController.GetById(docReq.Id);
 
-            buyReqService.Verify(x => x.GetById(docReq.Id), Times.Once());
+            docReqService.Verify(x => x.GetById(docReq.Id), Times.Once());
         }
 
         [Fact(DisplayName = "UpdateDocument Test")]

@@ -30,8 +30,6 @@ namespace BankRequest.UnitTest.BankRequestTest
             }
         }
 
-        //ADICIONAR TESTES QUE FALHEM
-
         [Fact(DisplayName = "ServicePostBankRequest Test")]
         public async Task PostBankRequest()
         {
@@ -54,14 +52,14 @@ namespace BankRequest.UnitTest.BankRequestTest
             PageParameter pageParameters = new PageParameter();
             var bankRequest = BankRequestFaker.GenerateBankList();
 
-            var bankReqService = Mocker.GetMock<IBankRequestRepository>();
-            bankReqService.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(bankRequest);
+            var bankReqRepository = Mocker.GetMock<IBankRequestRepository>();
+            bankReqRepository.Setup(x => x.GetAllWithPaging(pageParameters)).ReturnsAsync(bankRequest);
 
-            var bankReqController = Mocker.CreateInstance<BankRequestService>();
+            var bankReqService = Mocker.CreateInstance<BankRequestService>();
 
-            await bankReqController.GetAll(pageParameters);
+            await bankReqService.GetAll(pageParameters);
 
-            bankReqService.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
+            bankReqRepository.Verify(x => x.GetAllWithPaging(pageParameters), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceGetByIdBankRequest Test")]
@@ -69,14 +67,14 @@ namespace BankRequest.UnitTest.BankRequestTest
         {
             var bankRequest = new Domain.Entities.BankRequest();
 
-            var bankReqService = Mocker.GetMock<IBankRequestRepository>();
-            bankReqService.Setup(x => x.GetByIdAsync(bankRequest.Id)).ReturnsAsync(bankRequest);
+            var bankReqRepository = Mocker.GetMock<IBankRequestRepository>();
+            bankReqRepository.Setup(x => x.GetByIdAsync(bankRequest.Id)).ReturnsAsync(bankRequest);
 
-            var bankReqController = Mocker.CreateInstance<BankRequestService>();
+            var bankReqService = Mocker.CreateInstance<BankRequestService>();
 
-            await bankReqController.GetById(bankRequest.Id);
+            await bankReqService.GetById(bankRequest.Id);
 
-            bankReqService.Verify(x => x.GetByIdAsync(bankRequest.Id), Times.Once());
+            bankReqRepository.Verify(x => x.GetByIdAsync(bankRequest.Id), Times.Once());
         }
 
         [Fact(DisplayName = "ServiceUpdateBankRequest Test")]
@@ -85,18 +83,18 @@ namespace BankRequest.UnitTest.BankRequestTest
             var bankRequest = BankRequestFaker.GenerateBankReqNoOrigin();
             var mapper = _mapper.Map<Domain.Entities.BankRequest>(bankRequest);
 
-            var bankReqService = Mocker.GetMock<IBankRequestRepository>();
+            var bankReqRepository = Mocker.GetMock<IBankRequestRepository>();
             var mockMapper = Mocker.GetMock<IMapper>();
 
-            bankReqService.Setup(x => x.GetByIdAsync(bankRequest.Id)).ReturnsAsync(bankRequest);
-            bankReqService.Setup(X => X.UpdateAsync(bankRequest));
+            bankReqRepository.Setup(x => x.GetByIdAsync(bankRequest.Id)).ReturnsAsync(bankRequest);
+            bankReqRepository.Setup(X => X.UpdateAsync(bankRequest));
             mockMapper.Setup(x => x.Map<Domain.Entities.BankRequest>(It.IsAny<BankRequestDTO>())).Returns(mapper);
 
-            var bankReqController = Mocker.CreateInstance<BankRequestService>();
+            var bankReqService = Mocker.CreateInstance<BankRequestService>();
 
-            await bankReqController.ChangeBankRequest(bankRequest.Id, new BankRequestDTO());
+            await bankReqService.ChangeBankRequest(bankRequest.Id, new BankRequestDTO());
 
-            bankReqService.Verify(x => x.UpdateAsync(bankRequest), Times.Once());
+            bankReqRepository.Verify(x => x.UpdateAsync(bankRequest), Times.Once());
         }
     }
 }
