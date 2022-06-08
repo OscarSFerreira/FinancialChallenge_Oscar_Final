@@ -81,9 +81,10 @@ namespace Product.UnitTest.ProductTest
         public async Task GetProductByProductCategory()
         {
             var prod = ProductFaker.GenerateProd();
+            var prodList = ProductFaker.GenerateProdList();
 
             var prodRepository = Mocker.GetMock<IProductRepository>();
-            prodRepository.Setup(x => x.GetProductCategoryAsync(x => x.ProductCategory == prod.ProductCategory));
+            prodRepository.Setup(x => x.GetProductCategoryAsync(x => x.ProductCategory == prod.ProductCategory)).ReturnsAsync(prodList);
 
             var prodService = Mocker.CreateInstance<ProductService>();
 
