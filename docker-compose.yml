@@ -1,0 +1,84 @@
+version: '3.4'
+networks:
+  backend:
+services:
+  bankrequestapi:
+    image: ${DOCKER_REGISTRY-}bankrequestapi
+    build:
+      context: .
+      dockerfile: BankRequestApi/Dockerfile
+    ports:
+     - 8050:80
+     - 8051:443
+    environment:
+     - DB_HOST=sqldata
+     - DB_NAME=FinancialChallenge_Oscar_BK
+     - DB_SA_PASSWORD=Financial@2022
+    depends_on:
+     - sqldata
+    networks:
+     - backend
+
+  buyrequestapi:
+    image: ${DOCKER_REGISTRY-}buyrequestapi
+    build:
+      context: .
+      dockerfile: BuyRequestAPI/Dockerfile
+    ports:
+     - 8060:80
+     - 8061:443
+    environment:
+     - DB_HOST=sqldata
+     - DB_NAME=FinancialChallenge_Oscar_BK
+     - DB_SA_PASSWORD=Financial@2022
+    depends_on:
+     - sqldata
+    networks:
+     - backend
+
+  documentapi:
+    image: ${DOCKER_REGISTRY-}documentapi
+    build:
+      context: .
+      dockerfile: DocumentAPI/Dockerfile
+    ports:
+     - 8070:80
+     - 8071:443
+    environment:
+     - DB_HOST=sqldata
+     - DB_NAME=FinancialChallenge_Oscar_BK
+     - DB_SA_PASSWORD=Financial@2022
+    depends_on:
+     - sqldata
+    networks:
+     - backend
+
+  productapi:
+    image: ${DOCKER_REGISTRY-}productapi
+    build:
+      context: .
+      dockerfile: ProductAPI/Dockerfile
+    ports:
+     - 8080:80
+     - 8081:443
+    environment:
+     - DB_HOST=sqldata
+     - DB_NAME=FinancialChallenge_Oscar_BK
+     - DB_SA_PASSWORD=Financial@2022
+    depends_on:
+     - sqldata
+    networks:
+     - backend
+
+  sqldata:
+    image: mcr.microsoft.com/mssql/server
+    container_name: sqldata
+    environment:
+     - SA_PASSWORD=Financial@2022
+     - ACCEPT_EULA=Y
+    volumes:
+     - C:\Dados\volumes\mssql:/var/opt/mssql/data
+    ports:
+     - "1433:1433"
+    networks:
+     - backend

@@ -6,6 +6,7 @@ namespace FinancialChallenge_Oscar.Infrastructure.Context
     {
         public DataContext(DbContextOptions options) : base(options)
         {
+
         }
     }
 }

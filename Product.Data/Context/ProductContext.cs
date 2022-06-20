@@ -5,13 +5,10 @@ namespace Product.Data.Context
 {
     public class ProductContext : DataContext
     {
-
         public ProductContext(DbContextOptions<ProductContext> options) : base(options)
         {
-
         }
 
-        DbSet<Domain.Entities.Product> ProductsList { get; set; }
-
+        private DbSet<Domain.Entities.Product> ProductsList { get; set; }
     }
 }
