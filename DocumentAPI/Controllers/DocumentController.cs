@@ -38,7 +38,7 @@ namespace DocumentAPI.Controllers
             }
         }
 
-        [HttpGet("GetAllDocument")]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] PageParameter parameters)
         {
             try
@@ -55,7 +55,7 @@ namespace DocumentAPI.Controllers
             }
         }
 
-        [HttpGet("GetDocumentById")]
+        [HttpGet("GetById")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -122,6 +122,5 @@ namespace DocumentAPI.Controllers
                     ToString(), errorList, null));
             }
         }
-
     }
 }

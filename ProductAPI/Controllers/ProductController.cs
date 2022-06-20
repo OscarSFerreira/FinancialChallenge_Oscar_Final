@@ -39,7 +39,7 @@ namespace ProductAPI.Controllers
             }
         }
 
-        [HttpGet("GetAllProduct")]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] PageParameter parameters)
         {
             try
@@ -56,7 +56,7 @@ namespace ProductAPI.Controllers
             }
         }
 
-        [HttpGet("GetProductById")]
+        [HttpGet("GetById")]
         public async Task<IActionResult> GetById(Guid OriginId)
         {
             try
@@ -73,7 +73,7 @@ namespace ProductAPI.Controllers
             }
         }
 
-        [HttpGet("GetProductByProductCategory")]
+        [HttpGet("GetByCategory")]
         public async Task<IActionResult> GetByProductCategory(ProductCategory category)
         {
             try

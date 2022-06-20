@@ -38,7 +38,7 @@ namespace BankRequestAPI.Controllers
             }
         }
 
-        [HttpGet("GetByBankRequestId")]
+        [HttpGet("GetById")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -55,7 +55,7 @@ namespace BankRequestAPI.Controllers
             }
         }
 
-        [HttpGet("GetAllBankRequest")]
+        [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PageParameter parameters)
         {
             try
@@ -72,7 +72,7 @@ namespace BankRequestAPI.Controllers
             }
         }
 
-        [HttpGet("GetBankRequestByOriginId")]
+        [HttpGet("GetByOriginId")]
         public async Task<IActionResult> GetByOriginId(Guid OriginId)
         {
             try

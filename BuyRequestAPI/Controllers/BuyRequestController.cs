@@ -15,7 +15,6 @@ namespace BuyRequestAPI.Controllers
     [ApiController]
     public class BuyRequestController : ControllerBase
     {
-
         private readonly IBuyRequestService _buyRequestService;
 
         public BuyRequestController(IBuyRequestService buyRequestService)
@@ -40,7 +39,7 @@ namespace BuyRequestAPI.Controllers
             }
         }
 
-        [HttpGet("GetBuyRequestById")]
+        [HttpGet("GetById")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -74,7 +73,7 @@ namespace BuyRequestAPI.Controllers
             }
         }
 
-        [HttpGet("GetByClientIdAsync/{clientId}")]
+        [HttpGet("GetByClientId/{clientId}")]
         public async Task<IActionResult> GetByClientIdAsync(Guid clientId)
         {
             try
@@ -141,6 +140,5 @@ namespace BuyRequestAPI.Controllers
                     ToString(), errorList, null)); //perguntar ao pedro
             }
         }
-
     }
 }
