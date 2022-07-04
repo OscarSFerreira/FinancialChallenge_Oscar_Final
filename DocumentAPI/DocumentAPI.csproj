@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\RabbitMQConsumer\RabbitMQConsumer.csproj" />
     <ProjectReference Include="..\DocumentApplication\Document.Application.csproj" />
   </ItemGroup>
 

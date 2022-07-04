@@ -2,9 +2,10 @@ using AutoMapper;
 using BankRequest.Application.Interfaces;
 using BankRequest.Application.Mapping;
 using BankRequest.Application.Services;
-using BankRequest.ClientApi.Configuration;
 using BankRequest.Data.Context;
 using BankRequest.Data.Repository;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
+using RabbitMQConsumer.Listener;
 
 namespace BankRequestApi
 {
@@ -37,9 +38,12 @@ namespace BankRequestApi
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddBankRequestConfiguration(Configuration);
+            services.AddBankRequestConfigurationMQ(Configuration);
+            services.AddHostedService<BankRequestConsumer>();
+            services.AddSingleton<RabbitMQListenerGeneric, RabbitMQListenerGeneric>();
             services.AddScoped<IBankRequestRepository, BankRequestRepository>();
             services.AddScoped<IBankRequestService, BankRequestService>();
+
             services.AddAutoMapper(typeof(Program));
             var config = new MapperConfiguration(cfg =>
             {

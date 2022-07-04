@@ -7,18 +7,14 @@ namespace BankRequest.ClientApi.Configuration
 {
     public static class BankRequestConfiguration
     {
-
         public static void AddBankRequestConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-
             services.Configure<BankRequestOptions>(options =>
             {
-                options.BaseAddress = configuration["BankRequest.ClientApi:BaseAddress"];
-                options.EndPoint = configuration["BankRequest.ClientApi:EndPoint"];
+                options.BaseAddress = configuration["BankRequestClientApi:BaseAddress"];
+                options.EndPoint = configuration["BankRequestClientApi:EndPoint"];
             });
             services.AddHttpClient<IBankRequestClient, BankRequestClient>();
-
         }
-
     }
 }

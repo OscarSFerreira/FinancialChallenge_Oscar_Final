@@ -6,6 +6,9 @@ using BuyRequest.Application.Services;
 using BuyRequest.Data.Context;
 using BuyRequest.Data.Repository.BuyRequest;
 using BuyRequest.Data.Repository.ProductRequest;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Configuration;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text.Json.Serialization;
 
 namespace BuyRequestAPI
@@ -43,6 +45,7 @@ namespace BuyRequestAPI
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")).EnableSensitiveDataLogging();
             });
             services.AddBankRequestConfiguration(Configuration);
+            //services.AddSingleton<IMessageProducer, RabbitMQProducerGeneric>();
             services.AddScoped<IBuyRequestRepository, BuyRequestRepository>();
             services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
             services.AddScoped<IBuyRequestService, BuyRequestService>();

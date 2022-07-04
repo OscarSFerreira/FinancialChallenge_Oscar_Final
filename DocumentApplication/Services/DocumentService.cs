@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BankRequest.Application.DTO;
 using BankRequest.ClientApi.Interfaces;
 using BankRequest.Domain.Entities.Enum;
 using Document.Application.DTO;
@@ -8,6 +9,7 @@ using Document.Domain.Entities.Enum;
 using Document.Domain.Validators;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +22,16 @@ namespace Document.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IDocumentRepository _documentRepository;
+        private readonly IMessageProducer _messageProducer;
+
         public IBankRequestClient _bankRequestClient;
 
-        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IBankRequestClient bankRequestClient)
+        public DocumentService(IMapper mapper, IDocumentRepository documentRepository/*, IBankRequestClient bankRequestClient*/, IMessageProducer messageProducer)
         {
             _mapper = mapper;
             _documentRepository = documentRepository;
-            _bankRequestClient = bankRequestClient;
+            //_bankRequestClient = bankRequestClient;
+            _messageProducer = messageProducer;
         }
 
         public string ErrorList(ErrorMessage<DocumentDTO> error)
@@ -79,15 +84,26 @@ namespace Document.Application.Services
 
                     await _documentRepository.AddAsync(mapperDoc);
 
-                    var response = await _bankRequestClient.PostCashBank(Origin.Document, mapperDoc.Id, $"Financial Transaction id: {mapperDoc.Id}",
-                        type, mapperDoc.Total);
+                    //var response = await _bankRequestClient.PostCashBank(Origin.Document, mapperDoc.Id, $"Financial Transaction id: {mapperDoc.Id}",
+                    //    type, mapperDoc.Total);
 
-                    if (response == false)
+                    var bankreqDTO = new BankRequestDTO()
                     {
-                        var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
-                        var listError = ErrorList(result);
-                        throw new Exception(listError);
-                    }
+                        Origin = Origin.Document,
+                        OriginId = mapperDoc.Id,
+                        Description = $"Financial Transaction Id: {mapperDoc.Id}",
+                        Type = type,
+                        Amount = mapperDoc.Total
+                    };
+
+                    _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                    //if (response == false)
+                    //{
+                    //    var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    //    var listError = ErrorList(result);
+                    //    throw new Exception(listError);
+                    //}
                 }
                 else
                 {

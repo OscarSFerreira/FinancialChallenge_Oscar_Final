@@ -1,12 +1,12 @@
 using AutoMapper;
-using BankRequest.ClientApi;
-using BankRequest.ClientApi.Configuration;
-using BankRequest.ClientApi.Interfaces;
 using Document.Application.Interfaces;
 using Document.Application.Mapping;
 using Document.Application.Services;
 using Document.Data.Context;
 using Document.Data.Repository;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Configuration;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
 
 namespace DocumentAPI
 {
@@ -39,7 +38,8 @@ namespace DocumentAPI
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddBankRequestConfiguration(Configuration);
+            services.AddBankRequestConfigurationMQ(Configuration);
+            services.AddSingleton<IMessageProducer, RabbitMQProducerGeneric>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddAutoMapper(typeof(Program));
