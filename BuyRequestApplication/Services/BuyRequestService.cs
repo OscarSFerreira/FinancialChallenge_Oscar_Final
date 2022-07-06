@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BankRequest.Application.DTO;
 using BankRequest.ClientApi.Interfaces;
 using BankRequest.Domain.Entities.Enum;
 using BuyRequest.Application.DTO;
@@ -9,6 +10,7 @@ using BuyRequest.Domain.Entities.Enum;
 using BuyRequest.Domain.Validator;
 using FinancialChallenge_Oscar.Infrastructure.ErrorMessage;
 using FinancialChallenge_Oscar.Infrastructure.Paging;
+using FinancialChallenge_Oscar.Infrastructure.RabbitMQ.Generic.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +23,21 @@ namespace BuyRequest.Application.Services
     {
         private readonly IBuyRequestRepository _buyRequestRepository;
         private readonly IMapper _mapper;
-        public IBankRequestClient _bankRequestClient;
+
+        //public IBankRequestClient _bankRequestClient;
+        private readonly IMessageProducer _messageProducer;
+
         public IProductRequestRepository _productRequestRepository;
         public IProductRequestService _productRequestService;
 
-        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IMapper mapper, IBankRequestClient bankRequestClient, IProductRequestRepository productRequestRepository, IProductRequestService productRequestService)
+        public BuyRequestService(IBuyRequestRepository buyRequestRepository, IMapper mapper, IBankRequestClient bankRequestClient, IProductRequestRepository productRequestRepository, IProductRequestService productRequestService, IMessageProducer messageProducer)
         {
             _buyRequestRepository = buyRequestRepository;
             _mapper = mapper;
-            _bankRequestClient = bankRequestClient;
+            //_bankRequestClient = bankRequestClient;
             _productRequestRepository = productRequestRepository;
             _productRequestService = productRequestService;
+            _messageProducer = messageProducer;
         }
 
         public string ErrorList(ErrorMessage<BuyRequestDTO> error)
@@ -208,15 +214,26 @@ namespace BuyRequest.Application.Services
                     throw new Exception(listError);
                 }
 
-                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, mapperBuy.Id, description,
-                    type, recentValue);
-
-                if (response == false)
+                var bankreqDTO = new BankRequestDTO()
                 {
-                    var result = BadRequestMessage(buyinput, "There was an error while communicating with the BankRequestAPI, please try again!");
-                    var listError = ErrorList(result);
-                    throw new Exception(listError);
-                }
+                    Origin = Origin.PurchaseRequest,
+                    OriginId = mapperBuy.Id,
+                    Description = description,
+                    Type = type,
+                    Amount = recentValue
+                };
+
+                _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                //var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, mapperBuy.Id, description,
+                //    type, recentValue);
+
+                //if (response == false)
+                //{
+                //    var result = BadRequestMessage(buyinput, "There was an error while communicating with the BankRequestAPI, please try again!");
+                //    var listError = ErrorList(result);
+                //    throw new Exception(listError);
+                //}
             }
             return mapperBuy;
         }
@@ -248,15 +265,26 @@ namespace BuyRequest.Application.Services
 
             if (request.Status == Status.Finalized)
             {
-                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, request.Id, $"Purshase order id: {request.Id}",
-                    BankRequest.Domain.Entities.Enum.Type.Receive, request.TotalPricing);
+                //var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, request.Id, $"Purshase order id: {request.Id}",
+                //    BankRequest.Domain.Entities.Enum.Type.Receive, request.TotalPricing);
 
-                if (response == false)
+                var bankreqDTO = new BankRequestDTO()
                 {
-                    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
-                    var listError = ErrorList(result);
-                    throw new Exception(listError);
-                }
+                    Origin = Origin.PurchaseRequest,
+                    OriginId = request.Id,
+                    Description = $"Purshase order id: {request.Id}",
+                    Type = BankRequest.Domain.Entities.Enum.Type.Receive,
+                    Amount = request.TotalPricing
+                };
+
+                _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                //if (response == false)
+                //{
+                //    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
+                //    var listError = ErrorList(result);
+                //    throw new Exception(listError);
+                //}
             }
             return request;
         }
@@ -278,15 +306,26 @@ namespace BuyRequest.Application.Services
 
             if (buyRequest.Status == Status.Finalized)
             {
-                var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, id, $"Revert Purshase order id: {buyRequest.Id}",
-                    BankRequest.Domain.Entities.Enum.Type.Revert, -buyRequest.TotalPricing);
+                //var response = await _bankRequestClient.PostCashBank(Origin.PurchaseRequest, id, $"Revert Purshase order id: {buyRequest.Id}",
+                //    BankRequest.Domain.Entities.Enum.Type.Revert, -buyRequest.TotalPricing);
 
-                if (response == false)
+                var bankreqDTO = new BankRequestDTO()
                 {
-                    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
-                    var listError = ErrorList(result);
-                    throw new Exception(listError);
-                }
+                    Origin = Origin.PurchaseRequest,
+                    OriginId = id,
+                    Description = $"Revert Purshase order id: {buyRequest.Id}",
+                    Type = BankRequest.Domain.Entities.Enum.Type.Revert,
+                    Amount = -buyRequest.TotalPricing
+                };
+
+                _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                //if (response == false)
+                //{
+                //    var result = BadRequestMessage(mapperBuy, "There was an error while communicating with the BankRequestAPI, please try again!");
+                //    var listError = ErrorList(result);
+                //    throw new Exception(listError);
+                //}
             }
             return buyRequest;
         }

@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BankRequest.Application.DTO;
-using BankRequest.ClientApi.Interfaces;
 using BankRequest.Domain.Entities.Enum;
 using Document.Application.DTO;
 using Document.Application.Interfaces;
@@ -24,7 +23,7 @@ namespace Document.Application.Services
         private readonly IDocumentRepository _documentRepository;
         private readonly IMessageProducer _messageProducer;
 
-        public IBankRequestClient _bankRequestClient;
+        //public IBankRequestClient _bankRequestClient;
 
         public DocumentService(IMapper mapper, IDocumentRepository documentRepository/*, IBankRequestClient bankRequestClient*/, IMessageProducer messageProducer)
         {
@@ -189,15 +188,26 @@ namespace Document.Application.Services
                         total = input.Total;
                     }
 
-                    var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, description,
-                            type, total);
+                    //var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, description,
+                    //        type, total);
 
-                    if (response == false)
+                    var bankreqDTO = new BankRequestDTO()
                     {
-                        var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
-                        var listError = ErrorList(result);
-                        throw new Exception(listError);
-                    }
+                        Origin = Origin.Document,
+                        OriginId = document.Id,
+                        Description = description,
+                        Type = type,
+                        Amount = total
+                    };
+
+                    _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                    //if (response == false)
+                    //{
+                    //    var result = BadRequestMessage(input, "There was an error while communicating with the BankRequestAPI, please try again!");
+                    //    var listError = ErrorList(result);
+                    //    throw new Exception(listError);
+                    //}
                 }
 
                 await _documentRepository.UpdateAsync(mapperDoc);
@@ -245,15 +255,26 @@ namespace Document.Application.Services
                     operationType = BankRequest.Domain.Entities.Enum.Type.Payment;
                 }
 
-                var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Financial Transaction id: {document.Id}",
-                     operationType, document.Total);
+                //var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Financial Transaction id: {document.Id}",
+                //     operationType, document.Total);
 
-                if (response == false)
+                var bankreqDTO = new BankRequestDTO()
                 {
-                    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
-                    var listError = ErrorList(result);
-                    throw new Exception(listError);
-                }
+                    Origin = Origin.Document,
+                    OriginId = document.Id,
+                    Description = $"Financial Transaction id: {document.Id}",
+                    Type = operationType,
+                    Amount = document.Total
+                };
+
+                _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                //if (response == false)
+                //{
+                //    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                //    var listError = ErrorList(result);
+                //    throw new Exception(listError);
+                //}
             }
             return document;
         }
@@ -277,14 +298,26 @@ namespace Document.Application.Services
 
             if (document.Paid == true)
             {
-                var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Revert Document order id: {document.Id}",
-                    BankRequest.Domain.Entities.Enum.Type.Revert, -document.Total);
-                if (response == false)
+                //var response = await _bankRequestClient.PostCashBank(Origin.Document, document.Id, $"Revert Document order id: {document.Id}",
+                //    BankRequest.Domain.Entities.Enum.Type.Revert, -document.Total);
+
+                var bankreqDTO = new BankRequestDTO()
                 {
-                    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
-                    var listError = ErrorList(result);
-                    throw new Exception(listError);
-                }
+                    Origin = Origin.Document,
+                    OriginId = document.Id,
+                    Description = $"Revert Document order id: {document.Id}",
+                    Type = BankRequest.Domain.Entities.Enum.Type.Revert,
+                    Amount = document.Total
+                };
+
+                _messageProducer.PublishMessage(bankreqDTO, "bankrequest");
+
+                //if (response == false)
+                //{
+                //    var result = BadRequestMessage(mapperDoc, "There was an error while communicating with the BankRequestAPI, please try again!");
+                //    var listError = ErrorList(result);
+                //    throw new Exception(listError);
+                //}
             }
 
             return document;
