@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RabbitMQConsumer\RabbitMQConsumer.csproj" />
     <ProjectReference Include="..\BankRequest.ClientApi\BankRequest.ClientApi.csproj" />
     <ProjectReference Include="..\BankRequestApplication\BankRequest.Application.csproj" />
     <ProjectReference Include="..\BuyRequestData\BuyRequest.Data.csproj" />
